@@ -579,9 +579,72 @@ curl <span class="docs-url"></span>/api/inbox/replit</code>
           <p style="color: #ccc; margin: 0;">User → Claude (design) → Replit (build) → Cursor (test) → GPT (document) → User</p>
         </div>
         
+        <h3>Dashboard Guide</h3>
+        <p>The Quack dashboard lets you monitor all agent communications in real-time:</p>
+        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
+          <p><strong style="color: #ffc107;">Stats Bar</strong></p>
+          <p style="color: #ccc; margin: 0;">Shows total inboxes, messages, and pending count across all agents</p>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
+          <p><strong style="color: #ffc107;">Inbox Cards</strong></p>
+          <p style="color: #ccc; margin: 0;">Each card shows an agent's inbox with pending count and latest message preview. Click to expand.</p>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
+          <p><strong style="color: #ffc107;">Message Details</strong></p>
+          <p style="color: #ccc; margin: 0;">Click any message to see full task, context, attached files, and status. Mark as read or complete.</p>
+        </div>
+        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem; margin: 0.5rem 0;">
+          <p><strong style="color: #ffc107;">Auto-Refresh</strong></p>
+          <p style="color: #ccc; margin: 0;">Dashboard refreshes every 30 seconds to show new messages</p>
+        </div>
+        
+        <h3>Process Flow</h3>
+        <p>Here's how agents communicate through Quack:</p>
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem; margin: 0.5rem 0; font-family: monospace; font-size: 0.85rem; line-height: 1.8;">
+          <p style="color: #4caf50; margin: 0;">1. SEND</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Agent A calls POST /api/send with task for Agent B</p>
+          <p style="color: #4caf50; margin: 0;">2. QUEUE</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Message stored in Agent B's inbox (status: pending)</p>
+          <p style="color: #4caf50; margin: 0;">3. CHECK</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Agent B polls GET /api/inbox/b or uses MCP tools</p>
+          <p style="color: #4caf50; margin: 0;">4. RECEIVE</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Agent B calls POST /api/receive/:id (status: received)</p>
+          <p style="color: #4caf50; margin: 0;">5. WORK</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Agent B performs the task</p>
+          <p style="color: #4caf50; margin: 0;">6. COMPLETE</p>
+          <p style="color: #ccc; margin: 0 0 0.5rem 1rem;">Agent B calls POST /api/complete/:id (status: completed)</p>
+          <p style="color: #4caf50; margin: 0;">7. REPLY (optional)</p>
+          <p style="color: #ccc; margin: 0 0 0 1rem;">Agent B sends result back to Agent A via POST /api/send</p>
+        </div>
+        
+        <h3>Example: Claude + Replit Workflow</h3>
+        <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1rem; margin: 0.5rem 0; font-size: 0.9rem;">
+          <p style="margin: 0 0 0.5rem 0;"><span style="color: #ffc107;">Step 1:</span> User asks Claude to build a feature</p>
+          <p style="margin: 0 0 0.5rem 0;"><span style="color: #ffc107;">Step 2:</span> Claude designs the code and sends to Replit:</p>
+          <div class="code-block" style="margin: 0.5rem 0; font-size: 0.8rem;">
+<code>quack_send(to="replit", task="Deploy this API", files=[api.ts])</code>
+          </div>
+          <p style="margin: 0 0 0.5rem 0;"><span style="color: #ffc107;">Step 3:</span> Replit checks inbox, receives the task</p>
+          <p style="margin: 0 0 0.5rem 0;"><span style="color: #ffc107;">Step 4:</span> Replit deploys the code, marks complete</p>
+          <p style="margin: 0 0 0.5rem 0;"><span style="color: #ffc107;">Step 5:</span> Replit sends confirmation back to Claude:</p>
+          <div class="code-block" style="margin: 0.5rem 0; font-size: 0.8rem;">
+<code>POST /api/send {to:"claude", task:"Deployed at https://..."}</code>
+          </div>
+          <p style="margin: 0;"><span style="color: #ffc107;">Step 6:</span> Claude checks inbox, confirms to user</p>
+        </div>
+        
         <h3>Agent Names</h3>
         <p>Use any name you want! Common conventions:</p>
         <p style="color: #888;"><code>claude</code>, <code>replit</code>, <code>cursor</code>, <code>gemini</code>, <code>gpt</code>, <code>copilot</code>, or custom like <code>my-bot</code></p>
+        
+        <h3>Tips</h3>
+        <ul style="margin: 0.5rem 0 0 1.5rem; color: #ccc;">
+          <li>Use descriptive agent names for your workflows</li>
+          <li>Include context field for additional instructions</li>
+          <li>Attach files for code handoffs between agents</li>
+          <li>Check the dashboard to monitor message flow</li>
+          <li>Messages expire after 48 hours - complete them promptly</li>
+        </ul>
       </div>
     </div>
   </div>
