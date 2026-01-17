@@ -24,6 +24,9 @@ function sendSSE(res: Response, event: string, data: any): void {
 
 // Handle new SSE connection from mcp-remote
 export function handleMCPSSE(req: Request, res: Response): void {
+  console.log('🔌 SSE endpoint hit!');
+  res.write('event: ping\ndata: test\n\n');
+  
   const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
   console.log(`🔌 MCP client connecting: ${connectionId}`);
