@@ -196,6 +196,18 @@ app.get('/api/files/:id/meta', (req, res) => {
   res.json(meta);
 });
 
+// ============== SSE Test ==============
+
+app.get('/api/test-sse', (req, res) => {
+  console.log('SSE test hit');
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+  res.write('event: test\ndata: {"hello":"world"}\n\n');
+});
+
 // ============== MCP Endpoints ==============
 
 // SSE endpoint for mcp-remote connection
