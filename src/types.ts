@@ -46,6 +46,7 @@ export interface SendMessageRequest {
   task: string;
   context?: string;
   files?: QuackFile[];
+  fileRefs?: string[];
   projectName?: string;
   conversationExcerpt?: string;
   replyTo?: string;

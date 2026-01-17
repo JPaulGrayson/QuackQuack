@@ -17,6 +17,7 @@ import {
 } from './store.js';
 import { SendMessageRequest } from './types.js';
 import { handleMCPSSE, handleMCPMessage } from './mcp-handler.js';
+import { initFileStore, uploadFile, getFile, getFileMeta } from './file-store.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,8 +27,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public'));
 
-// Initialize store
+// Initialize stores
 initStore();
+initFileStore();
 
 // ============== REST API ==============
 
@@ -40,7 +42,26 @@ app.post('/api/send', (req, res) => {
       return res.status(400).json({ error: 'Missing required fields: to, task' });
     }
     
-    const message = sendMessage(request, request.from || 'api');
+    // Resolve file references if present
+    let files = request.files || [];
+    
+    if (request.fileRefs && request.fileRefs.length > 0) {
+      for (const fileId of request.fileRefs) {
+        const fileData = getFile(fileId);
+        if (fileData) {
+          files.push({
+            name: fileData.meta.name,
+            content: fileData.content,
+            type: fileData.meta.type,
+            size: fileData.meta.size,
+          });
+        }
+      }
+    }
+    
+    // Create message with resolved files
+    const messageRequest = { ...request, files };
+    const message = sendMessage(messageRequest, request.from || 'api');
     
     res.json({
       success: true,
@@ -118,6 +139,63 @@ app.get('/api/stats', (req, res) => {
   res.json(getStats());
 });
 
+// ============== FILE UPLOAD API ==============
+
+// Upload a file (returns fileId for use in messages)
+app.post('/api/files', (req, res) => {
+  try {
+    const { name, content, type, mimeType } = req.body;
+    
+    if (!name || !content || !type) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: name, content, type' 
+      });
+    }
+    
+    const file = uploadFile(name, content, type, mimeType);
+    
+    res.json({
+      success: true,
+      fileId: file.id,
+      file: {
+        id: file.id,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        expiresAt: file.expiresAt,
+      },
+    });
+  } catch (err) {
+    console.error('File upload error:', err);
+    res.status(500).json({ error: 'Failed to upload file' });
+  }
+});
+
+// Get file content
+app.get('/api/files/:id', (req, res) => {
+  const result = getFile(req.params.id);
+  
+  if (!result) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  res.json({
+    ...result.meta,
+    content: result.content,
+  });
+});
+
+// Get file metadata only (no content)
+app.get('/api/files/:id/meta', (req, res) => {
+  const meta = getFileMeta(req.params.id);
+  
+  if (!meta) {
+    return res.status(404).json({ error: 'File not found' });
+  }
+  
+  res.json(meta);
+});
+
 // ============== MCP Endpoints ==============
 
 // SSE endpoint for mcp-remote connection
@@ -143,6 +221,10 @@ app.listen(PORT, () => {
    - GET  /api/inbox/:name  - Check an inbox
    - POST /api/receive/:id  - Mark message as read
    - POST /api/complete/:id - Mark message as completed
+   
+   Files:
+   - POST /api/files        - Upload a file
+   - GET  /api/files/:id    - Get file content
    
    MCP (for Claude Desktop):
    - GET  /api/mcp/sse      - SSE endpoint
