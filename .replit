@@ -6,8 +6,8 @@ modules = ["nodejs-20"]
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm start"]
-deploymentTarget = "vm"
+run = ["sh", "-c", "PORT=3000 npm start"]
+deploymentTarget = "autoscale"
 
 [[ports]]
 localPort = 3000
@@ -15,7 +15,7 @@ externalPort = 80
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+externalPort = 80
 
 [workflows]
 runButton = "Project"
@@ -33,13 +33,13 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npx tsx watch src/server.ts"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 expertMode = true

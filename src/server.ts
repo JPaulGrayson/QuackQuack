@@ -22,6 +22,11 @@ import { initFileStore, uploadFile, getFile, getFileMeta } from './file-store.js
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Health check - must be first for deployment
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
