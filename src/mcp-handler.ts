@@ -28,8 +28,12 @@ export function handleMCPSSE(req: Request, res: Response): void {
   
   const sessionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
+  // SSE headers - matching Orchestrate's working config
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
   
   // Send endpoint event immediately

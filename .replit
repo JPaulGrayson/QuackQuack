@@ -6,8 +6,8 @@ modules = ["nodejs-20"]
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm run build && npm start"]
-deploymentTarget = "cloudrun"
+run = ["sh", "-c", "npm start"]
+deploymentTarget = "vm"
 
 [[ports]]
 localPort = 3000
