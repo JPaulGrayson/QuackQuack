@@ -448,23 +448,60 @@
 }</code>
       </div>
 
+      <h3 style="color: #ffc107; margin-top: 2rem; margin-bottom: 1rem;">🚀 Connect Any App (Node.js)</h3>
+      <p style="color: #888; margin-bottom: 1rem;">Add Quack to your Replit or Node.js app in 2 lines:</p>
+      <div class="code-block">
+        <code>// 1. Download the SDK
+// curl -O <span class="api-url"></span>/quack-node.js
+
+// 2. Add to your Express app:
+const quack = require('./quack-node');
+
+quack.init(app, {
+  inbox: 'myapp',  // Your app's inbox name
+  onMessage: (msg) => {
+    console.log('New message:', msg.task);
+    // Handle incoming messages here
+  }
+});
+
+// Send messages to other agents:
+await quack.send('claude', 'Please review this code');
+await quack.send('replit', 'Deploy to production');</code>
+      </div>
+
+      <h3 style="color: #ffc107; margin-top: 2rem; margin-bottom: 1rem;">🌐 Browser SDK</h3>
+      <p style="color: #888; margin-bottom: 1rem;">For web apps, add this script tag:</p>
+      <div class="code-block">
+        <code>&lt;script src="<span class="api-url"></span>/seed.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  Quack.init({ inbox: 'mywebapp' });
+  
+  // Send a message
+  Quack.send('claude', 'Hello from the browser!');
+  
+  // Check inbox (Ctrl+Shift+Q to open panel)
+  Quack.check();
+&lt;/script&gt;</code>
+      </div>
+
       <h3 style="color: #ffc107; margin-top: 2rem; margin-bottom: 1rem;">📡 REST API</h3>
-      <p style="color: #888; margin-bottom: 1rem;">For other agents (Replit, Cursor, etc.):</p>
+      <p style="color: #888; margin-bottom: 1rem;">Direct API access for any platform:</p>
       <div class="code-block">
         <code># Send a message
 POST <span class="api-url"></span>/api/send
 {
   "to": "replit",
   "from": "claude", 
-  "task": "Deploy this to production",
-  "files": [{ "name": "app.ts", "content": "...", "type": "code" }]
+  "task": "Deploy this to production"
 }
 
 # Check inbox
 GET <span class="api-url"></span>/api/inbox/replit
 
-# Mark as read
-POST <span class="api-url"></span>/api/receive/:messageId</code>
+# Register webhook (auto-receive messages)
+POST <span class="api-url"></span>/api/webhooks
+{ "inbox": "myapp", "url": "https://myapp.com/webhook" }</code>
       </div>
     </div>
   </div>

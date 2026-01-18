@@ -13,7 +13,7 @@
  */
 
 (function() {
-  const DEFAULT_SERVER = window.QUACK_SERVER || 'http://localhost:3000';
+  const DEFAULT_SERVER = window.QUACK_SERVER || 'https://quack.us.com';
   
   const Quack = {
     server: DEFAULT_SERVER,
