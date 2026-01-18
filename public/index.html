@@ -739,19 +739,26 @@ GET /api/inbox/your-name to check replies</code>
       if (e.target.id === 'modal') closeModal();
     });
 
-    // ============== Quack Sound Effects ==============
+    // ============== Quack Sound Effects (ElevenLabs) ==============
     let soundEnabled = localStorage.getItem('quackSounds') !== 'muted';
     let previousMessageCount = null;
     let quackCycleIndex = 0;
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     
-    const quackSounds = [
-      { count: 1, sad: false },
-      { count: 2, sad: false },
-      { count: 3, sad: false },
-      { count: 1, sad: true },
-      { count: 2, sad: true },
-    ];
+    const quackSoundTypes = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+    const audioCache = {};
+    
+    // Pre-load audio files
+    async function preloadSounds() {
+      for (const type of quackSoundTypes) {
+        try {
+          const audio = new Audio(`${API_BASE}/api/sounds/${type}`);
+          audio.preload = 'auto';
+          audioCache[type] = audio;
+        } catch (e) {
+          console.log(`Could not preload ${type}`);
+        }
+      }
+    }
 
     function updateMuteButton() {
       const btn = document.getElementById('mute-btn');
@@ -769,48 +776,41 @@ GET /api/inbox/your-name to check replies</code>
       localStorage.setItem('quackSounds', soundEnabled ? 'enabled' : 'muted');
       updateMuteButton();
       if (soundEnabled) {
-        audioContext.resume();
-        const sound = quackSounds[quackCycleIndex];
-        playQuack(sound.count, sound.sad);
-        quackCycleIndex = (quackCycleIndex + 1) % quackSounds.length;
+        const soundType = quackSoundTypes[quackCycleIndex];
+        playQuackSound(soundType);
+        quackCycleIndex = (quackCycleIndex + 1) % quackSoundTypes.length;
       }
     }
 
-    function playQuack(count = 1, sad = false) {
+    function playQuackSound(type = 'quack1') {
       if (!soundEnabled) return;
-      audioContext.resume();
       
-      for (let i = 0; i < count; i++) {
-        setTimeout(() => {
-          const osc = audioContext.createOscillator();
-          const gain = audioContext.createGain();
-          
-          osc.connect(gain);
-          gain.connect(audioContext.destination);
-          
-          const baseFreq = sad ? 180 : 280;
-          osc.frequency.setValueAtTime(baseFreq + Math.random() * 40, audioContext.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.6, audioContext.currentTime + 0.15);
-          
-          osc.type = 'square';
-          
-          gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-          
-          osc.start(audioContext.currentTime);
-          osc.stop(audioContext.currentTime + 0.15);
-        }, i * 200);
+      try {
+        // Try cached audio first
+        if (audioCache[type]) {
+          const audio = audioCache[type].cloneNode();
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+        } else {
+          // Fallback: create new audio element
+          const audio = new Audio(`${API_BASE}/api/sounds/${type}`);
+          audio.volume = 0.5;
+          audio.play().catch(() => {});
+        }
+      } catch (e) {
+        console.log('Could not play sound');
       }
     }
 
     function checkForNewMessages(newCount) {
       if (previousMessageCount !== null && newCount > previousMessageCount) {
-        playQuack(2);
+        playQuackSound('quack2');
       }
       previousMessageCount = newCount;
     }
 
     updateMuteButton();
+    preloadSounds();
 
     // Initial load
     loadStats();

@@ -5,6 +5,9 @@
 
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
+import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { 
   initStore, 
   sendMessage, 
@@ -20,6 +23,11 @@ import { SendMessageRequest } from './types.js';
 import { handleMCPSSE, handleMCPMessage } from './mcp-handler.js';
 import { initFileStore, uploadFile, getFile, getFileMeta } from './file-store.js';
 import { initWebhooks, registerWebhook, removeWebhook, listWebhooks, triggerWebhooks } from './webhooks.js';
+
+// ElevenLabs client for generating duck sounds
+const elevenlabs = process.env.ELEVENLABS_API_KEY 
+  ? new ElevenLabsClient({ apiKey: process.env.ELEVENLABS_API_KEY })
+  : null;
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -301,6 +309,115 @@ app.get('/api/mcp/sse', handleMCPSSE);
 
 // POST endpoint for MCP messages from mcp-remote
 app.post('/api/mcp/message', handleMCPMessage);
+
+// ============== Sound Effects (ElevenLabs) ==============
+
+const SOUNDS_DIR = path.join(process.cwd(), 'public', 'sounds');
+const soundCache: Map<string, boolean> = new Map();
+
+// Helper to convert stream to buffer
+async function streamToBuffer(stream: any): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
+// Generate a duck sound using ElevenLabs
+async function generateDuckSound(type: string): Promise<string | null> {
+  if (!elevenlabs) {
+    console.log('ElevenLabs not configured - skipping sound generation');
+    return null;
+  }
+
+  const soundPath = path.join(SOUNDS_DIR, `${type}.mp3`);
+  
+  // Check cache first
+  if (fs.existsSync(soundPath)) {
+    return soundPath;
+  }
+
+  const prompts: Record<string, string> = {
+    'quack1': 'single duck quack, cute cartoon duck sound effect, short and cheerful',
+    'quack2': 'two duck quacks in sequence, cute cartoon duck sounds, cheerful',
+    'quack3': 'three duck quacks in quick succession, cute cartoon duck chorus, playful',
+    'sad1': 'single sad duck quack, disappointed duck sound, lower pitch, melancholy',
+    'sad2': 'two sad duck quacks, disappointed duck sounds, slower and lower pitch',
+  };
+
+  const prompt = prompts[type] || prompts['quack1'];
+
+  try {
+    console.log(`Generating duck sound: ${type}...`);
+    const audio = await elevenlabs.textToSoundEffects.convert({
+      text: prompt,
+      durationSeconds: type.includes('3') ? 2 : (type.includes('2') ? 1.5 : 1),
+      promptInfluence: 0.5,
+    });
+
+    const buffer = await streamToBuffer(audio);
+    
+    // Ensure sounds directory exists
+    if (!fs.existsSync(SOUNDS_DIR)) {
+      fs.mkdirSync(SOUNDS_DIR, { recursive: true });
+    }
+    
+    fs.writeFileSync(soundPath, buffer);
+    soundCache.set(type, true);
+    console.log(`Duck sound generated: ${type}`);
+    return soundPath;
+  } catch (error) {
+    console.error(`Failed to generate sound ${type}:`, error);
+    return null;
+  }
+}
+
+// Endpoint to get duck sounds (generates on first request)
+app.get('/api/sounds/:type', async (req, res) => {
+  const { type } = req.params;
+  const validTypes = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+  
+  if (!validTypes.includes(type)) {
+    return res.status(400).json({ error: 'Invalid sound type' });
+  }
+
+  const soundPath = path.join(SOUNDS_DIR, `${type}.mp3`);
+  
+  // If sound exists, serve it
+  if (fs.existsSync(soundPath)) {
+    return res.sendFile(soundPath);
+  }
+
+  // Generate the sound
+  const generated = await generateDuckSound(type);
+  if (generated) {
+    return res.sendFile(generated);
+  }
+
+  res.status(503).json({ error: 'Sound generation unavailable' });
+});
+
+// Pre-generate all sounds on startup (background)
+async function preGenerateSounds() {
+  if (!elevenlabs) return;
+  
+  const types = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+  console.log('Pre-generating duck sounds...');
+  
+  for (const type of types) {
+    const soundPath = path.join(SOUNDS_DIR, `${type}.mp3`);
+    if (!fs.existsSync(soundPath)) {
+      await generateDuckSound(type);
+      // Small delay between API calls
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+  console.log('Duck sounds ready!');
+}
+
+// Start pre-generation in background
+setTimeout(preGenerateSounds, 2000);
 
 // ============== UI Routes ==============
 
