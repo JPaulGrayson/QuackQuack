@@ -749,12 +749,13 @@ GET /api/inbox/your-name to check replies</code>
     
     const quackSoundTypes = ['send', 'receive', 'fail'];
     const audioCache = {};
+    const soundVersion = Date.now(); // Cache-busting version
     
-    // Pre-load audio files
+    // Pre-load audio files with cache-busting
     async function preloadSounds() {
       for (const type of quackSoundTypes) {
         try {
-          const audio = new Audio(`${API_BASE}/api/sounds/${type}`);
+          const audio = new Audio(`${API_BASE}/api/sounds/${type}?v=${soundVersion}`);
           audio.preload = 'auto';
           audioCache[type] = audio;
         } catch (e) {
@@ -795,8 +796,8 @@ GET /api/inbox/your-name to check replies</code>
           audio.volume = 0.6;
           audio.play().catch(() => {});
         } else {
-          // Fallback: create new audio element
-          const audio = new Audio(`${API_BASE}/api/sounds/${type}`);
+          // Fallback: create new audio element with cache-busting
+          const audio = new Audio(`${API_BASE}/api/sounds/${type}?v=${soundVersion}`);
           audio.volume = 0.6;
           audio.play().catch(() => {});
         }
@@ -819,7 +820,7 @@ GET /api/inbox/your-name to check replies</code>
     loadStats();
     loadInboxes();
 
-    // Refresh every 30 seconds and check for new messages
+    // Refresh every 12 seconds and check for new messages
     setInterval(async () => {
       try {
         const res = await fetch(`${API_BASE}/api/stats`);
@@ -828,7 +829,7 @@ GET /api/inbox/your-name to check replies</code>
       } catch (e) {}
       loadStats();
       loadInboxes();
-    }, 30000);
+    }, 12000);
   </script>
 </body>
 
