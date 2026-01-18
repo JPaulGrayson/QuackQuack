@@ -873,14 +873,40 @@ GET /api/inbox/your-name to check replies</code>
 
     function checkForNewMessages(newCount) {
       if (previousMessageCount !== null && newCount > previousMessageCount) {
-        playQuackSound('receive');
+        const newMsgCount = newCount - previousMessageCount;
+        console.log('🦆 New message received! Playing sound...');
+        
+        // If tab is visible, play sound
+        if (!document.hidden) {
+          playQuackSound('receive');
+        } else {
+          // Tab is hidden - show browser notification instead
+          showBrowserNotification(newMsgCount);
+        }
+        
         // Flash the title to notify user
         const originalTitle = document.title;
         document.title = '🦆 NEW MESSAGE!';
         setTimeout(() => { document.title = originalTitle; }, 3000);
-        console.log('🦆 New message received! Playing sound...');
       }
       previousMessageCount = newCount;
+    }
+
+    function showBrowserNotification(count) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const notification = new Notification('🦆 Quack!', {
+          body: `You have ${count} new message${count > 1 ? 's' : ''}`,
+          icon: '/duck-icon.png',
+          tag: 'quack-notification',
+          requireInteraction: false
+        });
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+        // Also try to play sound
+        playQuackSound('receive');
+      }
     }
 
     // Sound permission handling
@@ -908,6 +934,13 @@ GET /api/inbox/your-name to check replies</code>
         console.log('🦆 Could not unlock audio:', e.message);
       });
       document.getElementById('sound-permission').style.display = 'none';
+      
+      // Also request browser notification permission for background alerts
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(perm => {
+          console.log('🦆 Notification permission:', perm);
+        });
+      }
     }
 
     function dismissSoundBanner() {
