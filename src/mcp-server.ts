@@ -39,7 +39,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           to: {
             type: 'string',
-            description: 'Destination agent: claude, replit, cursor, gemini, gpt',
+            description: 'Destination agent: claude, replit, cursor, gemini, gpt, grok, copilot',
           },
           task: {
             type: 'string',
@@ -75,7 +75,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           inbox: {
             type: 'string',
-            description: 'Inbox to check: claude, replit, cursor, gemini, gpt',
+            description: 'Inbox to check: claude, replit, cursor, gemini, gpt, grok, copilot',
           },
           includeRead: {
             type: 'boolean',

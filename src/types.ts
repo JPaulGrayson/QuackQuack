@@ -4,7 +4,7 @@
  */
 
 // Supported agent types
-export type AgentType = 'claude' | 'replit' | 'cursor' | 'gemini' | 'gpt' | 'custom';
+export type AgentType = 'claude' | 'replit' | 'cursor' | 'gemini' | 'gpt' | 'grok' | 'copilot' | 'custom';
 
 // Message status
 export type MessageStatus = 'pending' | 'read' | 'completed' | 'expired';
@@ -74,7 +74,7 @@ export const MCP_TOOLS = {
       properties: {
         to: {
           type: 'string',
-          description: 'Destination agent: claude, replit, cursor, gemini, gpt, or custom name',
+          description: 'Destination agent: claude, replit, cursor, gemini, gpt, grok, copilot, or custom name',
         },
         task: {
           type: 'string',
@@ -118,7 +118,7 @@ export const MCP_TOOLS = {
       properties: {
         inbox: {
           type: 'string',
-          description: 'Inbox to check: claude, replit, cursor, gemini, gpt, or custom name',
+          description: 'Inbox to check: claude, replit, cursor, gemini, gpt, grok, copilot, or custom name',
         },
         includeRead: {
           type: 'boolean',
