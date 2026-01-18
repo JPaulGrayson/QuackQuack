@@ -515,11 +515,7 @@ GET /api/inbox/your-name to check replies</code>
     const API_BASE = window.location.origin;
 
     // Set server URL in examples
-    document.getElementById('server-url').textContent = API_BASE;
     document.querySelectorAll('.api-url').forEach(el => {
-      el.textContent = API_BASE;
-    });
-    document.querySelectorAll('.docs-url').forEach(el => {
       el.textContent = API_BASE;
     });
 
@@ -712,14 +708,14 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('modal').classList.remove('active');
     }
 
-    // Open docs modal
+    // Open docs - redirects to setup page
     function openDocs() {
-      document.getElementById('docs-modal').classList.add('active');
+      window.location.href = '/setup';
     }
 
-    // Close docs modal
+    // Close docs - no-op since docs on separate page
     function closeDocs() {
-      document.getElementById('docs-modal').classList.remove('active');
+      // No longer used
     }
 
     // Time ago helper
@@ -741,10 +737,6 @@ GET /api/inbox/your-name to check replies</code>
     // Close modal on overlay click
     document.getElementById('modal').addEventListener('click', (e) => {
       if (e.target.id === 'modal') closeModal();
-    });
-
-    document.getElementById('docs-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'docs-modal') closeDocs();
     });
 
     // ============== Quack Sound Effects ==============
