@@ -744,7 +744,7 @@ GET /api/inbox/your-name to check replies</code>
     let previousMessageCount = null;
     let quackCycleIndex = 0;
     
-    const quackSoundTypes = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+    const quackSoundTypes = ['send', 'receive', 'fail'];
     const audioCache = {};
     
     // Pre-load audio files
@@ -782,19 +782,19 @@ GET /api/inbox/your-name to check replies</code>
       }
     }
 
-    function playQuackSound(type = 'quack1') {
+    function playQuackSound(type = 'send') {
       if (!soundEnabled) return;
       
       try {
         // Try cached audio first
         if (audioCache[type]) {
           const audio = audioCache[type].cloneNode();
-          audio.volume = 0.5;
+          audio.volume = 0.6;
           audio.play().catch(() => {});
         } else {
           // Fallback: create new audio element
           const audio = new Audio(`${API_BASE}/api/sounds/${type}`);
-          audio.volume = 0.5;
+          audio.volume = 0.6;
           audio.play().catch(() => {});
         }
       } catch (e) {
@@ -804,7 +804,7 @@ GET /api/inbox/your-name to check replies</code>
 
     function checkForNewMessages(newCount) {
       if (previousMessageCount !== null && newCount > previousMessageCount) {
-        playQuackSound('quack2');
+        playQuackSound('receive');
       }
       previousMessageCount = newCount;
     }

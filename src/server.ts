@@ -338,22 +338,20 @@ async function generateDuckSound(type: string): Promise<string | null> {
     return soundPath;
   }
 
-  const prompts: Record<string, string> = {
-    'quack1': 'single duck quack, cute cartoon duck sound effect, short and cheerful',
-    'quack2': 'two duck quacks in sequence, cute cartoon duck sounds, cheerful',
-    'quack3': 'three duck quacks in quick succession, cute cartoon duck chorus, playful',
-    'sad1': 'single sad duck quack, disappointed duck sound, lower pitch, melancholy',
-    'sad2': 'two sad duck quacks, disappointed duck sounds, slower and lower pitch',
+  const prompts: Record<string, { text: string; duration: number }> = {
+    'send': { text: 'single short duck quack, one quick quack sound effect, crisp and clear', duration: 0.5 },
+    'receive': { text: 'two quick duck quacks in a row, quack quack, happy duck sounds', duration: 1 },
+    'fail': { text: 'sad disappointed duck, wah wah wah, descending pitch, cartoon failure sound, duck version', duration: 1.5 },
   };
 
-  const prompt = prompts[type] || prompts['quack1'];
+  const config = prompts[type] || prompts['send'];
 
   try {
     console.log(`Generating duck sound: ${type}...`);
     const audio = await elevenlabs.textToSoundEffects.convert({
-      text: prompt,
-      durationSeconds: type.includes('3') ? 2 : (type.includes('2') ? 1.5 : 1),
-      promptInfluence: 0.5,
+      text: config.text,
+      durationSeconds: config.duration,
+      promptInfluence: 0.7,
     });
 
     const buffer = await streamToBuffer(audio);
@@ -376,10 +374,10 @@ async function generateDuckSound(type: string): Promise<string | null> {
 // Endpoint to get duck sounds (generates on first request)
 app.get('/api/sounds/:type', async (req, res) => {
   const { type } = req.params;
-  const validTypes = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+  const validTypes = ['send', 'receive', 'fail'];
   
   if (!validTypes.includes(type)) {
-    return res.status(400).json({ error: 'Invalid sound type' });
+    return res.status(400).json({ error: 'Invalid sound type. Use: send, receive, or fail' });
   }
 
   const soundPath = path.join(SOUNDS_DIR, `${type}.mp3`);
@@ -402,7 +400,7 @@ app.get('/api/sounds/:type', async (req, res) => {
 async function preGenerateSounds() {
   if (!elevenlabs) return;
   
-  const types = ['quack1', 'quack2', 'quack3', 'sad1', 'sad2'];
+  const types = ['send', 'receive', 'fail'];
   console.log('Pre-generating duck sounds...');
   
   for (const type of types) {
