@@ -787,28 +787,36 @@ GET /api/inbox/your-name to check replies</code>
     }
 
     function playQuackSound(type = 'send') {
-      if (!soundEnabled) return;
+      if (!soundEnabled) {
+        console.log('🦆 Sound muted, skipping playback');
+        return;
+      }
       
       try {
         // Try cached audio first
         if (audioCache[type]) {
           const audio = audioCache[type].cloneNode();
           audio.volume = 0.6;
-          audio.play().catch(() => {});
+          audio.play().catch(e => console.log('🦆 Sound blocked by browser:', e.message));
         } else {
           // Fallback: create new audio element with cache-busting
           const audio = new Audio(`${API_BASE}/api/sounds/${type}?v=${soundVersion}`);
           audio.volume = 0.6;
-          audio.play().catch(() => {});
+          audio.play().catch(e => console.log('🦆 Sound blocked by browser:', e.message));
         }
       } catch (e) {
-        console.log('Could not play sound');
+        console.log('🦆 Could not play sound:', e);
       }
     }
 
     function checkForNewMessages(newCount) {
       if (previousMessageCount !== null && newCount > previousMessageCount) {
         playQuackSound('receive');
+        // Flash the title to notify user
+        const originalTitle = document.title;
+        document.title = '🦆 NEW MESSAGE!';
+        setTimeout(() => { document.title = originalTitle; }, 3000);
+        console.log('🦆 New message received! Playing sound...');
       }
       previousMessageCount = newCount;
     }
