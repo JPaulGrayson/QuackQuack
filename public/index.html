@@ -750,7 +750,16 @@ GET /api/inbox/your-name to check replies</code>
     // ============== Quack Sound Effects ==============
     let soundEnabled = localStorage.getItem('quackSounds') !== 'muted';
     let previousMessageCount = null;
+    let quackCycleIndex = 0;
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const quackSounds = [
+      { count: 1, sad: false },
+      { count: 2, sad: false },
+      { count: 3, sad: false },
+      { count: 1, sad: true },
+      { count: 2, sad: true },
+    ];
 
     function updateMuteButton() {
       const btn = document.getElementById('mute-btn');
@@ -769,7 +778,9 @@ GET /api/inbox/your-name to check replies</code>
       updateMuteButton();
       if (soundEnabled) {
         audioContext.resume();
-        playQuack(1);
+        const sound = quackSounds[quackCycleIndex];
+        playQuack(sound.count, sound.sad);
+        quackCycleIndex = (quackCycleIndex + 1) % quackSounds.length;
       }
     }
 
