@@ -107,6 +107,22 @@ await quack.updateStatus(messageId, "in_progress");
 await quack.complete(messageId);
 ```
 
+**Dispatcher for auto-triggering webhooks:**
+```typescript
+import { Dispatcher, MemoryStore } from "@quack/core";
+
+const store = new MemoryStore();
+const dispatcher = new Dispatcher({ store, pollInterval: 5000 });
+dispatcher.registerWebhook('replit', 'https://my-replit-app.replit.app');
+dispatcher.start();
+```
+
+When a message to `/replit` is approved, the Dispatcher automatically:
+1. Detects the approved message
+2. Updates status to `in_progress`
+3. POSTs to the registered webhook's `/api/task` endpoint
+4. The receiving app processes the task and reports completion
+
 ## External Dependencies
 
 ### NPM Packages

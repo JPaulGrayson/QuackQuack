@@ -62,5 +62,17 @@
       "task": "Test full workflow",
       "files": []
     }
+  ],
+  "replit": [
+    {
+      "id": "2db37774-55eb-4d1a-b09c-382cd2f6d60e",
+      "to": "replit",
+      "from": "test",
+      "timestamp": "2026-01-19T21:01:54.750Z",
+      "expiresAt": "2026-01-21T21:01:54.750Z",
+      "status": "in_progress",
+      "task": "Test dispatch flow - this should auto-trigger when approved",
+      "files": []
+    }
   ]
 }
