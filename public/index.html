@@ -154,6 +154,196 @@
     .status-completed { background: #4caf50; color: white; }
     .status-failed { background: #f44336; color: white; }
 
+    /* Hierarchical Inbox Accordion */
+    .inbox-group {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .inbox-group:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .inbox-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .inbox-group-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .inbox-group-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .inbox-group-name {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .inbox-group-toggle {
+      font-size: 0.9rem;
+      color: #888;
+      transition: transform 0.2s;
+    }
+
+    .inbox-group.expanded .inbox-group-toggle {
+      transform: rotate(180deg);
+    }
+
+    .inbox-group-children {
+      display: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .inbox-group.expanded .inbox-group-children {
+      display: block;
+    }
+
+    .inbox-child {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .inbox-child:last-child {
+      border-bottom: none;
+    }
+
+    .inbox-child:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .inbox-child-name {
+      color: #ccc;
+      font-size: 0.95rem;
+    }
+
+    .inbox-child-badge {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+      padding: 0.15rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+
+    .inbox-child-badge.empty {
+      background: rgba(255, 255, 255, 0.1);
+      color: #666;
+    }
+
+    /* Settings Button */
+    .settings-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* Settings Modal */
+    .settings-modal {
+      background: #1e1e2e;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-section:last-child {
+      border-bottom: none;
+    }
+
+    .settings-section h3 {
+      color: #ffc107;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .settings-section p {
+      color: #888;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .api-key-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .api-key-input:focus {
+      outline: none;
+      border-color: #ffc107;
+    }
+
+    .api-key-input::placeholder {
+      color: #666;
+    }
+
+    .key-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .key-status.configured {
+      color: #4caf50;
+    }
+
+    .key-status.missing {
+      color: #888;
+    }
+
+    .settings-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
     .message-preview {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
@@ -529,6 +719,7 @@
 
   <a href="/setup" class="help-btn" title="Setup Guide">?</a>
   <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sounds">🔊</button>
+  <button class="settings-btn" onclick="openSettings()" title="Settings">⚙️</button>
 
   <div class="container">
     <header>
@@ -586,6 +777,55 @@ GET /api/inbox/your-name to check replies</code>
     </div>
   </div>
 
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal settings-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings</h2>
+        <button class="modal-close" onclick="closeSettings()">×</button>
+      </div>
+      <div id="settings-content">
+        <div class="settings-section">
+          <h3>🔑 API Keys (BYOK)</h3>
+          <p>Add your own API keys for AI integrations. Keys are stored locally in your browser.</p>
+          
+          <label style="display: block; margin-bottom: 0.5rem; color: #ccc; font-size: 0.85rem;">OpenAI API Key</label>
+          <input type="password" class="api-key-input" id="openai-key" placeholder="sk-..." />
+          <div class="key-status" id="openai-status"></div>
+          
+          <label style="display: block; margin-top: 1rem; margin-bottom: 0.5rem; color: #ccc; font-size: 0.85rem;">Anthropic API Key</label>
+          <input type="password" class="api-key-input" id="anthropic-key" placeholder="sk-ant-..." />
+          <div class="key-status" id="anthropic-status"></div>
+          
+          <label style="display: block; margin-top: 1rem; margin-bottom: 0.5rem; color: #ccc; font-size: 0.85rem;">Google AI API Key</label>
+          <input type="password" class="api-key-input" id="google-key" placeholder="AIza..." />
+          <div class="key-status" id="google-status"></div>
+          
+          <label style="display: block; margin-top: 1rem; margin-bottom: 0.5rem; color: #ccc; font-size: 0.85rem;">ElevenLabs API Key</label>
+          <input type="password" class="api-key-input" id="elevenlabs-key" placeholder="..." />
+          <div class="key-status" id="elevenlabs-status"></div>
+          
+          <div class="settings-actions">
+            <button class="btn btn-primary" onclick="saveApiKeys()">Save Keys</button>
+            <button class="btn btn-secondary" onclick="clearApiKeys()">Clear All</button>
+          </div>
+          
+          <p style="margin-top: 1rem; font-size: 0.75rem; color: #666;">
+            Note: Keys are stored in your browser's localStorage. For production use, consider server-side key management.
+          </p>
+        </div>
+        
+        <div class="settings-section">
+          <h3>🎨 Display</h3>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="collapse-default" style="width: 18px; height: 18px;" />
+            <span style="color: #ccc;">Collapse inboxes by default</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = window.location.origin;
 
@@ -608,7 +848,29 @@ GET /api/inbox/your-name to check replies</code>
       }
     }
 
-    // Fetch and display inboxes
+    // Get saved expand/collapse state from localStorage
+    function getExpandState() {
+      try {
+        return JSON.parse(localStorage.getItem('quackExpandState') || '{}');
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveExpandState(parent, expanded) {
+      const state = getExpandState();
+      state[parent] = expanded;
+      localStorage.setItem('quackExpandState', JSON.stringify(state));
+    }
+
+    function toggleInboxGroup(parent, e) {
+      e.stopPropagation();
+      const group = document.querySelector(`.inbox-group[data-parent="${parent}"]`);
+      const isExpanded = group.classList.toggle('expanded');
+      saveExpandState(parent, isExpanded);
+    }
+
+    // Fetch and display inboxes with hierarchical grouping
     async function loadInboxes() {
       try {
         const res = await fetch(`${API_BASE}/api/inboxes`);
@@ -616,36 +878,105 @@ GET /api/inbox/your-name to check replies</code>
 
         const container = document.getElementById('inboxes');
 
-        // Default inboxes
-        const defaultInboxes = ['claude', 'replit', 'cursor', 'gemini', 'gpt', 'grok', 'copilot', 'antigravity'];
-        const allInboxes = [...new Set([...defaultInboxes, ...inboxes])];
+        // Default parent inboxes
+        const defaultParents = ['claude', 'replit', 'cursor', 'gemini', 'gpt', 'grok', 'copilot', 'antigravity'];
+        
+        // Group inboxes by parent
+        const groups = {};
+        
+        // Initialize default parents
+        defaultParents.forEach(p => {
+          groups[p] = { children: [], totalPending: 0, hasMessages: false };
+        });
+
+        // Process all inboxes
+        for (const inbox of inboxes) {
+          const parts = inbox.split('/');
+          const parent = parts[0];
+          
+          if (!groups[parent]) {
+            groups[parent] = { children: [], totalPending: 0, hasMessages: false };
+          }
+          
+          if (parts.length > 1) {
+            // This is a child inbox
+            groups[parent].children.push(inbox);
+          }
+        }
+
+        // Fetch message counts for all inboxes
+        const inboxData = {};
+        const allInboxNames = [...new Set([...defaultParents, ...inboxes])];
+        
+        await Promise.all(allInboxNames.map(async (inbox) => {
+          try {
+            const msgRes = await fetch(`${API_BASE}/api/inbox/${inbox}?includeRead=true`);
+            const { messages } = await msgRes.json();
+            const pending = messages.filter(m => m.status === 'pending').length;
+            inboxData[inbox] = { messages, pending };
+          } catch (e) {
+            inboxData[inbox] = { messages: [], pending: 0 };
+          }
+        }));
+
+        // Calculate total pending per group
+        for (const [parent, group] of Object.entries(groups)) {
+          // Add parent's own pending
+          if (inboxData[parent]) {
+            group.totalPending += inboxData[parent].pending;
+            group.hasMessages = inboxData[parent].messages.length > 0;
+          }
+          // Add children's pending
+          for (const child of group.children) {
+            if (inboxData[child]) {
+              group.totalPending += inboxData[child].pending;
+              if (inboxData[child].messages.length > 0) group.hasMessages = true;
+            }
+          }
+        }
+
+        // Get expand state
+        const expandState = getExpandState();
+        const collapseDefault = localStorage.getItem('quackCollapseDefault') === 'true';
 
         let html = '';
 
-        for (const inbox of allInboxes) {
-          const msgRes = await fetch(`${API_BASE}/api/inbox/${inbox}?includeRead=true`);
-          const { messages, count } = await msgRes.json();
-          const pending = messages.filter(m => m.status === 'pending').length;
-
-          const latestMessage = messages[messages.length - 1];
+        for (const [parent, group] of Object.entries(groups)) {
+          const hasChildren = group.children.length > 0;
+          const shouldExpand = expandState[parent] !== undefined ? expandState[parent] : !collapseDefault;
+          const parentData = inboxData[parent] || { messages: [], pending: 0 };
+          const latestMessage = parentData.messages[parentData.messages.length - 1];
 
           html += `
-            <div class="inbox-card" onclick="openInbox('${inbox}')">
-              <div class="inbox-header">
-                <span class="inbox-name">/${inbox}</span>
-                <span class="inbox-badge ${pending === 0 ? 'empty' : ''}">${pending} pending</span>
+            <div class="inbox-group ${shouldExpand && hasChildren ? 'expanded' : ''}" data-parent="${parent}">
+              <div class="inbox-group-header" onclick="openInbox('${parent}')">
+                <div class="inbox-group-left">
+                  <span class="inbox-group-name">/${parent}</span>
+                  ${hasChildren ? `<span class="inbox-group-toggle" onclick="toggleInboxGroup('${parent}', event)">▼</span>` : ''}
+                </div>
+                <span class="inbox-badge ${group.totalPending === 0 ? 'empty' : ''}">${group.totalPending} pending</span>
               </div>
-              ${latestMessage ? `
-                <div class="message-preview">
+              ${hasChildren ? `
+                <div class="inbox-group-children">
+                  ${group.children.map(child => {
+                    const childData = inboxData[child] || { pending: 0 };
+                    const childName = child.split('/').slice(1).join('/');
+                    return `
+                      <div class="inbox-child" onclick="openInbox('${child}')">
+                        <span class="inbox-child-name">/${childName}</span>
+                        <span class="inbox-child-badge ${childData.pending === 0 ? 'empty' : ''}">${childData.pending}</span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              ` : ''}
+              ${!hasChildren && latestMessage ? `
+                <div class="message-preview" style="margin: 0 1.5rem 1.5rem; cursor: pointer;" onclick="openInbox('${parent}'); event.stopPropagation();">
                   <div class="message-from">From: ${latestMessage.from}</div>
-                  <div class="message-task">${latestMessage.task}</div>
+                  <div class="message-task">${latestMessage.task.substring(0, 100)}${latestMessage.task.length > 100 ? '...' : ''}</div>
                   <div class="message-time">${timeAgo(latestMessage.timestamp)}</div>
                 </div>
-              ` : `
-                <div class="message-preview">
-                  <div class="message-task" style="color: #666;">No messages yet</div>
-                </div>
-              `}
+              ` : ''}
             </div>
           `;
         }
@@ -854,6 +1185,87 @@ GET /api/inbox/your-name to check replies</code>
     document.getElementById('modal').addEventListener('click', (e) => {
       if (e.target.id === 'modal') closeModal();
     });
+
+    // Close settings modal on overlay click
+    document.getElementById('settings-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'settings-modal') closeSettings();
+    });
+
+    // ============== Settings / BYOK ==============
+    function openSettings() {
+      const modal = document.getElementById('settings-modal');
+      modal.classList.add('active');
+      loadApiKeyStatus();
+      loadDisplaySettings();
+    }
+
+    function closeSettings() {
+      document.getElementById('settings-modal').classList.remove('active');
+    }
+
+    function loadApiKeyStatus() {
+      const keys = ['openai', 'anthropic', 'google', 'elevenlabs'];
+      keys.forEach(key => {
+        const input = document.getElementById(`${key}-key`);
+        const status = document.getElementById(`${key}-status`);
+        const saved = localStorage.getItem(`quack_${key}_key`);
+        
+        if (saved) {
+          input.value = saved;
+          status.innerHTML = '<span class="configured">✓ Configured</span>';
+          status.classList.add('configured');
+          status.classList.remove('missing');
+        } else {
+          input.value = '';
+          status.innerHTML = '<span class="missing">Not configured</span>';
+          status.classList.add('missing');
+          status.classList.remove('configured');
+        }
+      });
+    }
+
+    function saveApiKeys() {
+      const keys = ['openai', 'anthropic', 'google', 'elevenlabs'];
+      keys.forEach(key => {
+        const input = document.getElementById(`${key}-key`);
+        const value = input.value.trim();
+        if (value) {
+          localStorage.setItem(`quack_${key}_key`, value);
+        } else {
+          localStorage.removeItem(`quack_${key}_key`);
+        }
+      });
+      loadApiKeyStatus();
+      playQuackSound('send');
+    }
+
+    function clearApiKeys() {
+      const keys = ['openai', 'anthropic', 'google', 'elevenlabs'];
+      keys.forEach(key => {
+        localStorage.removeItem(`quack_${key}_key`);
+        document.getElementById(`${key}-key`).value = '';
+      });
+      loadApiKeyStatus();
+    }
+
+    function loadDisplaySettings() {
+      const collapseDefault = localStorage.getItem('quackCollapseDefault') === 'true';
+      document.getElementById('collapse-default').checked = collapseDefault;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const collapseCheckbox = document.getElementById('collapse-default');
+      if (collapseCheckbox) {
+        collapseCheckbox.addEventListener('change', (e) => {
+          localStorage.setItem('quackCollapseDefault', e.target.checked);
+        });
+      }
+    });
+
+    // Get stored API key (for use by other features)
+    function getApiKey(provider) {
+      return localStorage.getItem(`quack_${provider}_key`) || null;
+    }
 
     // ============== Quack Sound Effects (ElevenLabs) ==============
     let soundEnabled = localStorage.getItem('quackSounds') !== 'muted';
