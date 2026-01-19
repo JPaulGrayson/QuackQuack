@@ -190,16 +190,20 @@ export function getAllInboxes(): string[] {
 
 // Get stats
 export function getStats(): { inboxes: number; messages: number; pending: number } {
+  let inboxCount = 0;
   let messages = 0;
   let pending = 0;
   
   for (const [_, msgs] of inboxes) {
-    messages += msgs.length;
-    pending += msgs.filter(m => m.status === 'pending').length;
+    if (msgs.length > 0) {
+      inboxCount++;
+      messages += msgs.length;
+      pending += msgs.filter(m => m.status === 'pending').length;
+    }
   }
   
   return {
-    inboxes: inboxes.size,
+    inboxes: inboxCount,
     messages,
     pending,
   };
