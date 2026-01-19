@@ -968,7 +968,17 @@ GET /api/inbox/your-name to check replies</code>
     // Show sound permission banner if not already granted
     setTimeout(showSoundBanner, 500);
 
-    // Initial load
+    // Initial load - set baseline for new message detection
+    async function initializeMessageCount() {
+      try {
+        const res = await fetch(`${API_BASE}/api/stats`);
+        const data = await res.json();
+        previousMessageCount = data.pending;
+        console.log('🦆 Initial pending count:', previousMessageCount);
+      } catch (e) {}
+    }
+    
+    initializeMessageCount();
     loadStats();
     loadInboxes();
 
