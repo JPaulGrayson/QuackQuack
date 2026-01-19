@@ -79,6 +79,34 @@ Supports nested inbox paths for multiple projects on the same platform:
 - Real-time inbox monitoring interface
 - Embeddable `seed.js` script for adding Quack to any web app
 
+## @quack/core Package
+
+A reusable npm package extracted from Quack for integration with other apps (like Orchestrate):
+
+```
+packages/@quack/core/
+├── src/
+│   ├── types/index.ts      # QuackMessage, MessageStatus, STATUS_TRANSITIONS, MCP_TOOLS
+│   ├── store/index.ts      # QuackStore interface + MemoryStore class
+│   ├── client/index.ts     # QuackClient API wrapper class
+│   ├── server/index.ts     # createQuackRouter() Express router factory
+│   └── index.ts            # Re-exports everything
+├── dist/                    # Compiled JavaScript + type declarations
+├── package.json            # @quack/core npm package
+└── tsconfig.json
+```
+
+**Usage in other apps:**
+```typescript
+import { QuackClient } from "@quack/core/client";
+
+const quack = new QuackClient({ baseUrl: "https://quack.us.com", defaultFrom: "my-app" });
+await quack.checkInbox("my-inbox");
+await quack.approve(messageId);
+await quack.updateStatus(messageId, "in_progress");
+await quack.complete(messageId);
+```
+
 ## External Dependencies
 
 ### NPM Packages
