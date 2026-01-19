@@ -21,7 +21,8 @@ import {
   getAllInboxes,
   getStats 
 } from './store.js';
-import { SendMessageRequest, VALID_STATUSES, MessageStatus } from './types.js';
+import { SendMessageRequest, VALID_STATUSES, MessageStatus, QuackMessage } from './types.js';
+import { QuackStore, Dispatcher } from '../packages/@quack/core/dist/index.js';
 import { handleMCPSSE, handleMCPMessage } from './mcp-handler.js';
 import { initFileStore, uploadFile, getFile, getFileMeta } from './file-store.js';
 import { initWebhooks, registerWebhook, removeWebhook, listWebhooks, triggerWebhooks } from './webhooks.js';
@@ -54,6 +55,28 @@ app.use(express.static('public', {
 initStore();
 initFileStore();
 initWebhooks();
+
+// Create QuackStore adapter for Dispatcher
+const storeAdapter: QuackStore = {
+  init: async () => {},
+  sendMessage: async (req, from) => sendMessage(req, from),
+  checkInbox: async (inbox, includeRead) => checkInbox(inbox, includeRead),
+  getMessage: async (id) => getMessage(id),
+  receiveMessage: async (id) => receiveMessage(id),
+  completeMessage: async (id) => completeMessage(id),
+  approveMessage: async (id) => approveMessage(id),
+  updateMessageStatus: async (id, status) => updateMessageStatus(id, status),
+  deleteMessage: async (id) => deleteMessage(id),
+  getAllInboxes: async () => getAllInboxes(),
+  getStats: async () => getStats(),
+};
+
+// Initialize Dispatcher for auto-triggering webhook agents
+const dispatcher = new Dispatcher({ store: storeAdapter, pollInterval: 5000 });
+// Register this Quack server's own /api/task endpoint for self-dispatching (demo/testing)
+// In production, register external Replit app URLs here
+dispatcher.registerWebhook('replit', `http://localhost:${PORT}`);
+dispatcher.start();
 
 // ============== REST API ==============
 
@@ -276,6 +299,47 @@ app.get('/api/inboxes', (req, res) => {
 // Stats
 app.get('/api/stats', (req, res) => {
   res.json(getStats());
+});
+
+// ============== DISPATCHER TASK ENDPOINT ==============
+
+// Receive task from Dispatcher (called when messages to /replit are approved)
+app.post('/api/task', async (req, res) => {
+  const { messageId, task, context, from, to, files } = req.body;
+  
+  console.log(`📥 Task received from ${from}: ${messageId}`);
+  console.log(`   Task: ${task?.substring(0, 100)}...`);
+  
+  // Acknowledge receipt immediately
+  res.json({ 
+    success: true, 
+    message: 'Task received and queued for processing',
+    messageId 
+  });
+  
+  // In a real implementation, this would trigger the Replit agent to process the task
+  // For now, we just log it - the calling app should implement actual task processing
+  // and call /api/status/:id with 'completed' or 'failed' when done
+});
+
+// Dispatcher status endpoint
+app.get('/api/dispatcher/status', (req, res) => {
+  res.json({
+    running: dispatcher.isRunning(),
+    webhooks: dispatcher.getRegisteredWebhooks(),
+  });
+});
+
+// Register a webhook for dispatcher
+app.post('/api/dispatcher/webhook', (req, res) => {
+  const { agent, baseUrl } = req.body;
+  
+  if (!agent || !baseUrl) {
+    return res.status(400).json({ error: 'Missing required fields: agent, baseUrl' });
+  }
+  
+  dispatcher.registerWebhook(agent, baseUrl);
+  res.json({ success: true, agent, baseUrl });
 });
 
 // ============== FILE UPLOAD API ==============
@@ -554,6 +618,11 @@ app.listen(PORT, () => {
    MCP (for Claude Desktop):
    - GET  /api/mcp/sse      - SSE endpoint
    - POST /api/mcp/message  - Message handler
+   
+   Dispatcher (auto-trigger webhooks):
+   - POST /api/task         - Receive dispatched task
+   - GET  /api/dispatcher/status  - Check dispatcher status
+   - POST /api/dispatcher/webhook - Register dispatcher webhook
    
    Dashboard:
    - http://localhost:${PORT}
