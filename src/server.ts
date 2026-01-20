@@ -141,11 +141,13 @@ app.post('/api/send', (req, res) => {
 });
 
 // Check inbox - supports single level (e.g., /api/inbox/claude)
+// Query params: includeRead=true, autoApprove=true
 app.get('/api/inbox/:name', (req, res) => {
   const inbox = req.params.name;
   const includeRead = req.query.includeRead === 'true';
+  const autoApprove = req.query.autoApprove === 'true';
   
-  const messages = checkInbox(inbox, includeRead);
+  const messages = checkInbox(inbox, includeRead, autoApprove);
   
   res.json({
     inbox,
@@ -155,11 +157,13 @@ app.get('/api/inbox/:name', (req, res) => {
 });
 
 // Check inbox - supports two-level hierarchical paths (e.g., /api/inbox/claude/project-alpha)
+// Query params: includeRead=true, autoApprove=true
 app.get('/api/inbox/:parent/:child', (req, res) => {
   const inbox = `${req.params.parent}/${req.params.child}`;
   const includeRead = req.query.includeRead === 'true';
+  const autoApprove = req.query.autoApprove === 'true';
   
-  const messages = checkInbox(inbox, includeRead);
+  const messages = checkInbox(inbox, includeRead, autoApprove);
   
   res.json({
     inbox,
@@ -169,11 +173,13 @@ app.get('/api/inbox/:parent/:child', (req, res) => {
 });
 
 // Check inbox - supports three-level hierarchical paths (e.g., /api/inbox/claude/project/subtask)
+// Query params: includeRead=true, autoApprove=true
 app.get('/api/inbox/:parent/:child/:subchild', (req, res) => {
   const inbox = `${req.params.parent}/${req.params.child}/${req.params.subchild}`;
   const includeRead = req.query.includeRead === 'true';
+  const autoApprove = req.query.autoApprove === 'true';
   
-  const messages = checkInbox(inbox, includeRead);
+  const messages = checkInbox(inbox, includeRead, autoApprove);
   
   res.json({
     inbox,

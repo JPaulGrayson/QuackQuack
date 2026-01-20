@@ -21,6 +21,9 @@ export interface QuackFile {
   size: number;         // bytes
 }
 
+// Message priority levels
+export type MessagePriority = 'low' | 'normal' | 'high' | 'urgent';
+
 // Core message format
 export interface QuackMessage {
   id: string;
@@ -40,6 +43,11 @@ export interface QuackMessage {
   projectName?: string;
   conversationExcerpt?: string;
   
+  // New metadata fields (per Claude's spec)
+  project?: string;             // project identifier for filtering
+  priority?: MessagePriority;   // message priority
+  tags?: string[];              // arbitrary tags for organization
+  
   // Threading
   replyTo?: string;             // message ID this is replying to
   threadId?: string;            // thread ID linking conversation
@@ -58,6 +66,10 @@ export interface SendMessageRequest {
   conversationExcerpt?: string;
   replyTo?: string;
   threadId?: string;            // optional: specify existing thread
+  // New metadata fields (per Claude's spec)
+  project?: string;             // project identifier for filtering
+  priority?: MessagePriority;   // message priority (low/normal/high/urgent)
+  tags?: string[];              // arbitrary tags for organization
 }
 
 export interface InboxResponse {
@@ -112,6 +124,20 @@ export const MCP_TOOLS = {
         conversationExcerpt: {
           type: 'string',
           description: 'Relevant conversation history',
+        },
+        project: {
+          type: 'string',
+          description: 'Project identifier for filtering and organization',
+        },
+        priority: {
+          type: 'string',
+          enum: ['low', 'normal', 'high', 'urgent'],
+          description: 'Message priority level',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Tags for categorization and filtering',
         },
       },
       required: ['to', 'task'],

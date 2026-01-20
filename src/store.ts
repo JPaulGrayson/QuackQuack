@@ -198,6 +198,10 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
     conversationExcerpt: req.conversationExcerpt,
     replyTo: req.replyTo,
     threadId: threadId || messageId,  // Root messages get their own ID as threadId
+    // New metadata fields
+    project: req.project,
+    priority: req.priority,
+    tags: req.tags,
   };
   
   // Add file sizes if not present
@@ -222,8 +226,24 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
 // Check inbox for messages
 // By default returns actionable messages (pending, approved, in_progress)
 // Use includeRead=true to also see read/completed/failed messages
-export function checkInbox(inbox: string, includeRead: boolean = false): QuackMessage[] {
+// Use autoApprove=true to automatically approve pending messages when checked
+export function checkInbox(inbox: string, includeRead: boolean = false, autoApprove: boolean = false): QuackMessage[] {
   const messages = inboxes.get(normalizeInboxPath(inbox)) || [];
+  
+  // Auto-approve pending messages if requested
+  if (autoApprove) {
+    let approved = 0;
+    for (const msg of messages) {
+      if (msg.status === 'pending') {
+        msg.status = 'approved';
+        approved++;
+      }
+    }
+    if (approved > 0) {
+      persistStore();
+      console.log(`✅ Auto-approved ${approved} message(s) in /${inbox}`);
+    }
+  }
   
   if (includeRead) {
     return messages;

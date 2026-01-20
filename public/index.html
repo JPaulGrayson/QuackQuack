@@ -990,6 +990,27 @@ GET /api/inbox/your-name to check replies</code>
           </label>
         </div>
         
+        <div class="settings-section">
+          <h3>🔔 Notifications</h3>
+          <p style="color: #999; font-size: 0.85rem; margin-bottom: 1rem;">Get notified when new messages arrive, even when the tab is in the background.</p>
+          
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.75rem;">
+            <input type="checkbox" id="sound-notifications" style="width: 18px; height: 18px;" />
+            <span style="color: #ccc;">Sound notifications (quack!)</span>
+          </label>
+          
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.75rem;">
+            <input type="checkbox" id="browser-notifications" style="width: 18px; height: 18px;" />
+            <span style="color: #ccc;">Browser notifications</span>
+          </label>
+          
+          <div id="notification-status" style="font-size: 0.85rem; color: #888; margin-bottom: 0.75rem;"></div>
+          
+          <button class="btn btn-secondary" onclick="testNotifications()" style="margin-top: 0.5rem;">
+            Test Notifications
+          </button>
+        </div>
+        
         <div class="settings-section" style="border-top: 1px solid #ff4444; padding-top: 1.5rem; margin-top: 1.5rem;">
           <h3 style="color: #ff6666;">Danger Zone</h3>
           <p style="color: #999; font-size: 0.85rem;">These actions cannot be undone. Use with caution.</p>
@@ -1520,6 +1541,7 @@ GET /api/inbox/your-name to check replies</code>
       modal.classList.add('active');
       loadApiKeyStatus();
       loadDisplaySettings();
+      loadNotificationSettings();
     }
 
     function closeSettings() {
@@ -1600,11 +1622,112 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('collapse-default').checked = collapseDefault;
     }
 
+    function loadNotificationSettings() {
+      const soundEnabled = localStorage.getItem('quackSounds') !== 'muted';
+      const browserEnabled = localStorage.getItem('quackBrowserNotifications') === 'true';
+      
+      document.getElementById('sound-notifications').checked = soundEnabled;
+      document.getElementById('browser-notifications').checked = browserEnabled;
+      
+      updateNotificationStatus();
+    }
+    
+    function updateNotificationStatus() {
+      const statusEl = document.getElementById('notification-status');
+      if (!statusEl) return;
+      
+      if (!('Notification' in window)) {
+        statusEl.textContent = 'Browser notifications not supported';
+        statusEl.style.color = '#ff6666';
+      } else if (Notification.permission === 'granted') {
+        statusEl.textContent = 'Browser notifications enabled';
+        statusEl.style.color = '#4ade80';
+      } else if (Notification.permission === 'denied') {
+        statusEl.textContent = 'Browser notifications blocked - enable in browser settings';
+        statusEl.style.color = '#ff6666';
+      } else {
+        statusEl.textContent = 'Browser notifications: click checkbox to enable';
+        statusEl.style.color = '#888';
+      }
+    }
+    
+    async function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        alert('Browser notifications are not supported in your browser');
+        return false;
+      }
+      
+      if (Notification.permission === 'granted') {
+        return true;
+      }
+      
+      if (Notification.permission === 'denied') {
+        alert('Notifications are blocked. Please enable them in your browser settings.');
+        return false;
+      }
+      
+      const permission = await Notification.requestPermission();
+      updateNotificationStatus();
+      return permission === 'granted';
+    }
+    
+    function testNotifications() {
+      const soundEnabled = document.getElementById('sound-notifications').checked;
+      const browserEnabled = document.getElementById('browser-notifications').checked;
+      
+      if (soundEnabled) {
+        playQuackSound('receive');
+      }
+      
+      if (browserEnabled) {
+        if (Notification.permission === 'granted') {
+          new Notification('🦆 Test Quack!', {
+            body: 'Notifications are working perfectly!',
+            icon: '/duck-icon.png',
+            tag: 'quack-test'
+          });
+        } else {
+          alert('Please enable browser notifications first');
+        }
+      }
+      
+      if (!soundEnabled && !browserEnabled) {
+        alert('Enable at least one notification type to test');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const collapseCheckbox = document.getElementById('collapse-default');
       if (collapseCheckbox) {
         collapseCheckbox.addEventListener('change', (e) => {
           localStorage.setItem('quackCollapseDefault', e.target.checked);
+        });
+      }
+      
+      const soundCheckbox = document.getElementById('sound-notifications');
+      if (soundCheckbox) {
+        soundCheckbox.addEventListener('change', (e) => {
+          localStorage.setItem('quackSounds', e.target.checked ? 'enabled' : 'muted');
+          soundEnabled = e.target.checked;
+          updateMuteButton();
+        });
+      }
+      
+      const browserCheckbox = document.getElementById('browser-notifications');
+      if (browserCheckbox) {
+        browserCheckbox.addEventListener('change', async (e) => {
+          if (e.target.checked) {
+            const granted = await requestNotificationPermission();
+            if (!granted) {
+              e.target.checked = false;
+              localStorage.setItem('quackBrowserNotifications', 'false');
+            } else {
+              localStorage.setItem('quackBrowserNotifications', 'true');
+            }
+          } else {
+            localStorage.setItem('quackBrowserNotifications', 'false');
+          }
+          updateNotificationStatus();
         });
       }
     });
@@ -1816,7 +1939,9 @@ GET /api/inbox/your-name to check replies</code>
     }
 
     function showBrowserNotification(count) {
-      if ('Notification' in window && Notification.permission === 'granted') {
+      const browserNotificationsEnabled = localStorage.getItem('quackBrowserNotifications') === 'true';
+      
+      if (browserNotificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
         const notification = new Notification('🦆 Quack!', {
           body: `You have ${count} new message${count > 1 ? 's' : ''}`,
           icon: '/duck-icon.png',
@@ -1827,7 +1952,10 @@ GET /api/inbox/your-name to check replies</code>
           window.focus();
           notification.close();
         };
-        // Also try to play sound
+      }
+      
+      // Also try to play sound if enabled
+      if (soundEnabled) {
         playQuackSound('receive');
       }
     }
@@ -1859,13 +1987,6 @@ GET /api/inbox/your-name to check replies</code>
         console.log('🦆 Could not unlock audio:', e.message);
       });
       document.getElementById('sound-permission').style.display = 'none';
-      
-      // Also request browser notification permission for background alerts
-      if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().then(perm => {
-          console.log('🦆 Notification permission:', perm);
-        });
-      }
     }
 
     function dismissSoundBanner() {

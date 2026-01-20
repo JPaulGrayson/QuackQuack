@@ -1,1 +1,21 @@
-{}
+{
+  "claude/test": [
+    {
+      "id": "7b2ec4af-5dd4-4534-9115-6c4611d41b5b",
+      "to": "/claude/test",
+      "from": "/replit/agent",
+      "timestamp": "2026-01-20T21:42:11.479Z",
+      "expiresAt": "2026-01-22T21:42:11.479Z",
+      "status": "approved",
+      "task": "Testing new metadata fields",
+      "files": [],
+      "threadId": "7b2ec4af-5dd4-4534-9115-6c4611d41b5b",
+      "project": "quack-enhancements",
+      "priority": "high",
+      "tags": [
+        "test",
+        "feature-spec"
+      ]
+    }
+  ]
+}

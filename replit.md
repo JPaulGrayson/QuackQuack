@@ -37,8 +37,8 @@ Preferred communication style: Simple, everyday language.
 5. **types.ts** - TypeScript interfaces for messages, files, and API requests
 
 ### API Structure
-- `POST /api/send` - Send message to agent inbox
-- `GET /api/inbox/:agent` - Check agent's inbox (supports hierarchical paths like /claude/project-alpha)
+- `POST /api/send` - Send message to agent inbox (supports metadata: project, priority, tags)
+- `GET /api/inbox/:agent` - Check agent's inbox (supports hierarchical paths, ?autoApprove=true)
 - `POST /api/receive/:agent` - Mark message as read
 - `POST /api/complete/:id` - Mark message as completed
 - `POST /api/approve/:id` - Approve message (for Orchestrate integration)
@@ -48,6 +48,19 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/files` - Upload file attachment
 - `GET /api/files/:id` - Retrieve file content
 - Webhook registration endpoints for push notifications
+
+### Message Metadata (New)
+Messages can include optional metadata for organization and filtering:
+- `project` - Project identifier string
+- `priority` - One of: low, normal, high, urgent
+- `tags` - Array of string tags for categorization
+
+### Auto-Approve on Check (New)
+Agents can use `?autoApprove=true` when checking their inbox to automatically approve pending messages:
+```
+GET /api/inbox/claude/project?autoApprove=true
+```
+This reduces friction - agents just say "quack" and messages are auto-approved when retrieved.
 
 ### Message Statuses & Workflow
 Messages follow a strict workflow with validated transitions:
@@ -97,7 +110,9 @@ Messages support conversation threads for back-and-forth communication:
 - **Hierarchical Inbox UI**: Inboxes with child paths (e.g., `/replit/quack`) group under parent with collapsible accordion. Shows aggregated pending counts. Expand/collapse state persisted in localStorage.
 - **BYOK Settings Modal**: Gear icon opens settings for users to add their own API keys (OpenAI, Anthropic, Google AI, ElevenLabs). Keys stored in browser localStorage.
 - **Sound Notifications**: Duck quack sounds when new messages arrive (uses ElevenLabs-generated audio). Mute button and permission banner.
-- **Browser Notifications**: Desktop notifications for new messages when tab is hidden.
+- **Browser Notifications**: Desktop notifications for new messages when tab is hidden. Opt-in via Settings modal.
+- **Notification Settings**: Settings modal includes checkboxes for sound and browser notifications with test button.
+- **Stats Display**: Shows Inboxes, Messages, Pending, Approved, and In Progress counts.
 
 ## @quack/core Package
 
