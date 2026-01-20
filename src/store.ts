@@ -58,10 +58,11 @@ function persistStore(): void {
   }
 }
 
-// Clean up expired messages
+// Clean up expired messages and empty inboxes
 function cleanupExpired(): void {
   const now = new Date();
   let cleaned = 0;
+  const emptyInboxes: string[] = [];
   
   for (const [inbox, messages] of inboxes) {
     const valid = messages.filter(m => {
@@ -70,13 +71,55 @@ function cleanupExpired(): void {
     });
     
     cleaned += messages.length - valid.length;
-    inboxes.set(inbox, valid);
+    
+    if (valid.length === 0) {
+      emptyInboxes.push(inbox);
+    } else {
+      inboxes.set(inbox, valid);
+    }
   }
   
-  if (cleaned > 0) {
-    console.log(`🧹 Cleaned ${cleaned} expired messages`);
+  // Remove empty inboxes
+  for (const inbox of emptyInboxes) {
+    inboxes.delete(inbox);
+  }
+  
+  if (cleaned > 0 || emptyInboxes.length > 0) {
+    console.log(`🧹 Cleaned ${cleaned} expired messages, removed ${emptyInboxes.length} empty inboxes`);
     persistStore();
   }
+}
+
+// Export cleanup for manual triggering
+export function runCleanup(): { cleaned: number; removedInboxes: string[] } {
+  const now = new Date();
+  let cleaned = 0;
+  const emptyInboxes: string[] = [];
+  
+  for (const [inbox, messages] of inboxes) {
+    const valid = messages.filter(m => {
+      const expires = new Date(m.expiresAt);
+      return expires > now;
+    });
+    
+    cleaned += messages.length - valid.length;
+    
+    if (valid.length === 0) {
+      emptyInboxes.push(inbox);
+    } else {
+      inboxes.set(inbox, valid);
+    }
+  }
+  
+  for (const inbox of emptyInboxes) {
+    inboxes.delete(inbox);
+  }
+  
+  if (cleaned > 0 || emptyInboxes.length > 0) {
+    persistStore();
+  }
+  
+  return { cleaned, removedInboxes: emptyInboxes };
 }
 
 // Send a message

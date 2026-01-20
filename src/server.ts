@@ -21,7 +21,8 @@ import {
   getAllInboxes,
   getStats,
   getThreadMessages,
-  getAllThreads
+  getAllThreads,
+  runCleanup
 } from './store.js';
 import { SendMessageRequest, VALID_STATUSES, MessageStatus, QuackMessage } from './types.js';
 import { QuackStore, Dispatcher } from '../packages/@quack/core/dist/index.js';
@@ -301,6 +302,16 @@ app.get('/api/inboxes', (req, res) => {
 // Stats
 app.get('/api/stats', (req, res) => {
   res.json(getStats());
+});
+
+// Cleanup expired messages and empty inboxes
+app.post('/api/cleanup', (req, res) => {
+  const result = runCleanup();
+  res.json({
+    success: true,
+    cleaned: result.cleaned,
+    removedInboxes: result.removedInboxes,
+  });
 });
 
 // ============== THREADING ENDPOINTS ==============

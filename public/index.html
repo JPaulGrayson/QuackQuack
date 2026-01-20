@@ -1266,24 +1266,30 @@ GET /api/inbox/your-name to check replies</code>
         document.querySelector('.modal-title').textContent = 'Message Details';
 
         content.innerHTML = `
+          <div class="message-header-panel" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <span style="color: #ffc107; font-weight: 500;">${message.from}</span>
+                <span style="color: #888;"> → </span>
+                <span style="color: #00d9ff;">${message.to}</span>
+                <span class="status-badge status-${message.status}" style="margin-left: 0.5rem;">${message.status.replace('_', ' ')}</span>
+              </div>
+              <div class="message-time">${timeAgo(message.timestamp)}</div>
+            </div>
+            <div class="message-actions" style="margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              ${message.status === 'pending' ? `<button class="btn btn-primary" onclick="approveMsg('${message.id}')">Approve</button>` : ''}
+              ${message.status === 'pending' ? `<button class="btn btn-secondary" onclick="markRead('${message.id}')">Mark Read</button>` : ''}
+              ${message.status === 'approved' ? `<button class="btn btn-primary" onclick="setStatus('${message.id}', 'in_progress')">Start Work</button>` : ''}
+              ${message.status === 'in_progress' ? `<button class="btn btn-primary" onclick="markComplete('${message.id}')">Complete</button>` : ''}
+              ${message.status === 'in_progress' ? `<button class="btn btn-danger" onclick="setStatus('${message.id}', 'failed')">Failed</button>` : ''}
+              ${message.status === 'read' ? `<button class="btn btn-primary" onclick="markComplete('${message.id}')">Complete</button>` : ''}
+              <button class="btn btn-danger" onclick="deleteMsg('${message.id}')">Delete</button>
+            </div>
+          </div>
+          
           <div class="message-detail">
             <div class="message-detail-label">Task</div>
             <div class="message-detail-value task">${message.task}</div>
-          </div>
-          
-          <div class="message-detail">
-            <div class="message-detail-label">From → To</div>
-            <div class="message-detail-value">${message.from} → ${message.to}</div>
-          </div>
-          
-          <div class="message-detail">
-            <div class="message-detail-label">Status</div>
-            <div class="message-detail-value"><span class="status-badge status-${message.status}">${message.status.replace('_', ' ')}</span></div>
-          </div>
-          
-          <div class="message-detail">
-            <div class="message-detail-label">Time</div>
-            <div class="message-detail-value">${new Date(message.timestamp).toLocaleString()}</div>
           </div>
           
           ${message.context ? `
@@ -1302,14 +1308,7 @@ GET /api/inbox/your-name to check replies</code>
             </div>
           ` : ''}
           
-          <div class="message-actions">
-            ${message.status === 'pending' ? `<button class="btn btn-primary" onclick="approveMsg('${message.id}')">Approve</button>` : ''}
-            ${message.status === 'pending' ? `<button class="btn btn-secondary" onclick="markRead('${message.id}')">Mark as Read</button>` : ''}
-            ${message.status === 'approved' ? `<button class="btn btn-primary" onclick="setStatus('${message.id}', 'in_progress')">Start Work</button>` : ''}
-            ${message.status === 'in_progress' ? `<button class="btn btn-primary" onclick="markComplete('${message.id}')">Complete</button>` : ''}
-            ${message.status === 'in_progress' ? `<button class="btn btn-danger" onclick="setStatus('${message.id}', 'failed')">Mark Failed</button>` : ''}
-            ${message.status === 'read' ? `<button class="btn btn-primary" onclick="markComplete('${message.id}')">Complete</button>` : ''}
-            <button class="btn btn-danger" onclick="deleteMsg('${message.id}')">Delete</button>
+          <div style="margin-top: 1rem; text-align: right;">
             <button class="btn btn-secondary" onclick="openInbox('${message.to}')">Back to Inbox</button>
             <button class="btn btn-secondary" onclick="closeModal()">Close</button>
           </div>
