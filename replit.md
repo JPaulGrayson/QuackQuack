@@ -79,7 +79,18 @@ Supports nested inbox paths for multiple projects on the same platform:
 - Real-time inbox monitoring interface
 - Embeddable `seed.js` script for adding Quack to any web app
 
+### Message Threading
+Messages support conversation threads for back-and-forth communication:
+- Every message has a `threadId` (root messages use their own ID)
+- Use `replyTo` field when sending to reply to a specific message
+- Replies inherit the `threadId` from the original message
+- Original messages are auto-completed when a reply is received
+- `GET /api/threads` - List all threads with message counts
+- `GET /api/thread/:threadId` - Get all messages in a thread
+
 ### Dashboard Features
+- **Inbox/Thread Toggle**: Switch between inbox view and thread conversation view
+- **Thread View**: Shows multi-message conversations grouped by thread, with participant info and message previews
 - **Hierarchical Inbox UI**: Inboxes with child paths (e.g., `/replit/quack`) group under parent with collapsible accordion. Shows aggregated pending counts. Expand/collapse state persisted in localStorage.
 - **BYOK Settings Modal**: Gear icon opens settings for users to add their own API keys (OpenAI, Anthropic, Google AI, ElevenLabs). Keys stored in browser localStorage.
 - **Sound Notifications**: Duck quack sounds when new messages arrive (uses ElevenLabs-generated audio). Mute button and permission banner.
