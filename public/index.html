@@ -1896,6 +1896,12 @@ GET /api/inbox/your-name to check replies</code>
         return;
       }
       
+      // Limit to 3 toasts at a time - remove oldest if needed
+      const existingToasts = container.querySelectorAll('.toast');
+      if (existingToasts.length >= 3) {
+        existingToasts[0].remove();
+      }
+      
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.dataset.id = message.id;

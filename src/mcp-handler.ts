@@ -123,6 +123,9 @@ function processMCPMessage(message: any): any {
                   to: { type: 'string', description: 'Destination: replit, cursor, gemini, gpt, or custom name' },
                   task: { type: 'string', description: 'What the receiving agent should do' },
                   context: { type: 'string', description: 'Background information' },
+                  project: { type: 'string', description: 'Project identifier for filtering' },
+                  priority: { type: 'string', enum: ['low', 'normal', 'high', 'urgent'], description: 'Message priority level' },
+                  tags: { type: 'array', items: { type: 'string' }, description: 'Tags for categorization' },
                   files: {
                     type: 'array',
                     items: {
@@ -206,6 +209,9 @@ function handleToolCall(id: string, toolName: string, args: any): any {
           from: 'claude',
           task: args.task,
           context: args.context,
+          project: args.project,
+          priority: args.priority,
+          tags: args.tags,
           files: args.files || [],
         };
         
