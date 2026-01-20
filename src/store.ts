@@ -122,6 +122,11 @@ export function runCleanup(): { cleaned: number; removedInboxes: string[] } {
   return { cleaned, removedInboxes: emptyInboxes };
 }
 
+// Normalize inbox path - removes leading slashes and converts to lowercase
+function normalizeInboxPath(inbox: string): string {
+  return inbox.replace(/^\/+/, '').toLowerCase();
+}
+
 // Validate inbox path format (must be platform/application, not just a single name)
 // Top-level identities like "orchestrate" should be "replit/orchestrate" or "claude/orchestrate"
 export function validateInboxPath(to: string): { valid: boolean; error?: string } {
@@ -201,8 +206,8 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
     size: f.size || Buffer.byteLength(f.content, 'utf-8'),
   }));
   
-  // Get or create inbox
-  const inbox = req.to.toLowerCase();
+  // Get or create inbox - normalize to remove leading slashes
+  const inbox = normalizeInboxPath(req.to);
   if (!inboxes.has(inbox)) {
     inboxes.set(inbox, []);
   }
@@ -218,7 +223,7 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
 // By default returns actionable messages (pending, approved, in_progress)
 // Use includeRead=true to also see read/completed/failed messages
 export function checkInbox(inbox: string, includeRead: boolean = false): QuackMessage[] {
-  const messages = inboxes.get(inbox.toLowerCase()) || [];
+  const messages = inboxes.get(normalizeInboxPath(inbox)) || [];
   
   if (includeRead) {
     return messages;
