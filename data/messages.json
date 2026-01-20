@@ -44,7 +44,7 @@
       "from": "/replit/agent",
       "timestamp": "2026-01-20T22:06:43.240Z",
       "expiresAt": "2026-01-22T22:06:43.240Z",
-      "status": "pending",
+      "status": "approved",
       "task": "Feature summary: Implemented 3 new features for Quack. (1) Root + Context Metadata - can now send to root inboxes like /claude with project metadata for organization. (2) Auto-approve on check - use ?autoApprove=true to automatically approve pending messages. (3) Browser notifications - opt-in desktop notifications via Settings modal. All features tested and working!",
       "files": [],
       "threadId": "3e166f8e-96fd-4186-9db4-1ca1ff850309",
@@ -61,7 +61,7 @@
       "from": "replit",
       "timestamp": "2026-01-20T22:52:39.558Z",
       "expiresAt": "2026-01-22T22:52:39.558Z",
-      "status": "pending",
+      "status": "approved",
       "task": "Testing metadata display",
       "files": [],
       "threadId": "edc9ce54-4b69-46e5-8940-17209f7b0c82",
@@ -70,6 +70,22 @@
       "tags": [
         "test",
         "metadata"
+      ]
+    },
+    {
+      "id": "14aa31d5-e5c8-4f5e-ac5f-052c8feca8d4",
+      "to": "/claude",
+      "from": "/replit/test",
+      "timestamp": "2026-01-20T23:20:35.320Z",
+      "expiresAt": "2026-01-22T23:20:35.320Z",
+      "status": "approved",
+      "task": "Test metadata",
+      "files": [],
+      "threadId": "14aa31d5-e5c8-4f5e-ac5f-052c8feca8d4",
+      "project": "test-proj",
+      "priority": "high",
+      "tags": [
+        "test"
       ]
     }
   ],
@@ -117,6 +133,46 @@
       "task": "Conversational: claude to replit - should be pending",
       "files": [],
       "threadId": "21713370-3cdd-488a-bdd6-4977f3442c28"
+    }
+  ],
+  "cursor/inbox": [
+    {
+      "id": "f40b61ce-56bd-4f49-91e7-18f4aec2718f",
+      "to": "/cursor/inbox",
+      "from": "/replit/test",
+      "timestamp": "2026-01-20T23:20:37.078Z",
+      "expiresAt": "2026-01-22T23:20:37.078Z",
+      "status": "approved",
+      "task": "Auto-approve test",
+      "files": [],
+      "threadId": "f40b61ce-56bd-4f49-91e7-18f4aec2718f"
+    }
+  ],
+  "replit/inbox": [
+    {
+      "id": "3842dfd9-e745-483a-8fb1-9ffa2ddb4315",
+      "to": "/replit/inbox",
+      "from": "/gpt/assistant",
+      "timestamp": "2026-01-20T23:20:39.862Z",
+      "expiresAt": "2026-01-22T23:20:39.862Z",
+      "status": "pending",
+      "task": "Needs approval test",
+      "files": [],
+      "threadId": "3842dfd9-e745-483a-8fb1-9ffa2ddb4315"
+    }
+  ],
+  "replit/test": [
+    {
+      "id": "8e7e7e5d-270a-47f2-bc5e-253d828b77ef",
+      "to": "/replit/test",
+      "from": "/gpt/test",
+      "timestamp": "2026-01-20T23:22:20.389Z",
+      "expiresAt": "2026-01-22T23:22:20.389Z",
+      "status": "pending",
+      "task": "This should trigger ONE toast only",
+      "files": [],
+      "threadId": "8e7e7e5d-270a-47f2-bc5e-253d828b77ef",
+      "priority": "urgent"
     }
   ]
 }

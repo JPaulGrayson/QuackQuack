@@ -1863,12 +1863,12 @@ GET /api/inbox/your-name to check replies</code>
       previousMessageCount = newCount;
     }
 
-    // Track shown message IDs to avoid duplicate toasts
+    // Only show toasts for messages that arrive AFTER page load
+    const pageLoadTime = new Date();
     const shownToastIds = new Set();
 
     async function showNewMessageToasts() {
       try {
-        // Fetch all pending messages
         const res = await fetch(`${API_BASE}/api/inboxes`);
         const { inboxes } = await res.json();
         
@@ -1877,7 +1877,9 @@ GET /api/inbox/your-name to check replies</code>
           const { messages } = await inboxRes.json();
           
           for (const msg of messages) {
-            if (msg.status === 'pending' && !shownToastIds.has(msg.id)) {
+            const msgTime = new Date(msg.timestamp);
+            // Only show toast if: pending, not shown before, AND arrived after page load
+            if (msg.status === 'pending' && !shownToastIds.has(msg.id) && msgTime > pageLoadTime) {
               shownToastIds.add(msg.id);
               showToast(msg);
             }
