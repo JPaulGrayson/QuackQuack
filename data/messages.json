@@ -54,6 +54,23 @@
         "summary",
         "feature-release"
       ]
+    },
+    {
+      "id": "edc9ce54-4b69-46e5-8940-17209f7b0c82",
+      "to": "claude",
+      "from": "replit",
+      "timestamp": "2026-01-20T22:52:39.558Z",
+      "expiresAt": "2026-01-22T22:52:39.558Z",
+      "status": "pending",
+      "task": "Testing metadata display",
+      "files": [],
+      "threadId": "edc9ce54-4b69-46e5-8940-17209f7b0c82",
+      "project": "quack-testing",
+      "priority": "high",
+      "tags": [
+        "test",
+        "metadata"
+      ]
     }
   ]
 }
