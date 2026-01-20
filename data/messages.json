@@ -74,5 +74,29 @@
       "task": "Test dispatch flow - this should auto-trigger when approved",
       "files": []
     }
+  ],
+  "replit/quack": [
+    {
+      "id": "2955d862-2b6f-4a80-b7d0-b15494207311",
+      "to": "replit/quack",
+      "from": "test",
+      "timestamp": "2026-01-20T00:06:02.728Z",
+      "expiresAt": "2026-01-22T00:06:02.728Z",
+      "status": "pending",
+      "task": "Testing hierarchical inbox on DEV",
+      "files": []
+    }
+  ],
+  "replit/orchestrate": [
+    {
+      "id": "f22a1de5-1bdf-47b7-a4ad-dcbf23badfbf",
+      "to": "replit/orchestrate",
+      "from": "test",
+      "timestamp": "2026-01-20T00:06:04.233Z",
+      "expiresAt": "2026-01-22T00:06:04.233Z",
+      "status": "pending",
+      "task": "Another child inbox test on DEV",
+      "files": []
+    }
   ]
 }
