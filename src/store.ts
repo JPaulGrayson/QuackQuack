@@ -340,6 +340,15 @@ export function getStats(): { inboxes: number; messages: number; pending: number
   };
 }
 
+// Reset all data (admin function)
+export function resetAllData(): { cleared: number } {
+  const totalMessages = Array.from(inboxes.values()).reduce((sum, msgs) => sum + msgs.length, 0);
+  inboxes.clear();
+  persistStore();
+  console.log(`🔄 All data reset - cleared ${totalMessages} messages`);
+  return { cleared: totalMessages };
+}
+
 // Get all messages in a thread
 export function getThreadMessages(threadId: string): QuackMessage[] {
   const threadMessages: QuackMessage[] = [];

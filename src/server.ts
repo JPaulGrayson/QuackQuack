@@ -23,7 +23,8 @@ import {
   getThreadMessages,
   getAllThreads,
   runCleanup,
-  validateInboxPath
+  validateInboxPath,
+  resetAllData
 } from './store.js';
 import { SendMessageRequest, VALID_STATUSES, MessageStatus, QuackMessage } from './types.js';
 import { QuackStore, Dispatcher } from '../packages/@quack/core/dist/index.js';
@@ -321,6 +322,16 @@ app.post('/api/cleanup', (req, res) => {
     success: true,
     cleaned: result.cleaned,
     removedInboxes: result.removedInboxes,
+  });
+});
+
+// Admin reset - clears ALL data
+app.post('/api/admin/reset', (req, res) => {
+  const result = resetAllData();
+  res.json({
+    success: true,
+    message: 'All data has been reset',
+    cleared: result.cleared,
   });
 });
 
