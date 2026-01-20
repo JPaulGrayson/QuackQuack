@@ -127,5 +127,18 @@
       "files": [],
       "threadId": "c49e787b-2360-4a7a-9a14-bafa061dd078"
     }
+  ],
+  "orchestrate": [
+    {
+      "id": "60eabe5b-ca05-47a1-bc90-6609f54f812c",
+      "to": "orchestrate",
+      "from": "test",
+      "timestamp": "2026-01-20T15:26:01.842Z",
+      "expiresAt": "2026-01-22T15:26:01.842Z",
+      "status": "pending",
+      "task": "Test message to standalone orchestrate inbox",
+      "files": [],
+      "threadId": "60eabe5b-ca05-47a1-bc90-6609f54f812c"
+    }
   ]
 }

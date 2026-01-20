@@ -958,8 +958,8 @@ GET /api/inbox/your-name to check replies</code>
 
         const container = document.getElementById('inboxes');
 
-        // Default parent inboxes
-        const defaultParents = ['claude', 'replit', 'cursor', 'gemini', 'gpt', 'grok', 'copilot', 'antigravity'];
+        // Default parent inboxes (shown even if empty)
+        const defaultParents = ['claude', 'replit', 'cursor', 'gemini', 'gpt', 'grok', 'copilot', 'antigravity', 'orchestrate'];
         
         // Group inboxes by parent
         const groups = {};
@@ -969,11 +969,12 @@ GET /api/inbox/your-name to check replies</code>
           groups[p] = { children: [], totalPending: 0, hasMessages: false };
         });
 
-        // Process all inboxes
+        // Process all inboxes from API (including non-default ones)
         for (const inbox of inboxes) {
           const parts = inbox.split('/');
           const parent = parts[0];
           
+          // Create group for any inbox parent (not just defaults)
           if (!groups[parent]) {
             groups[parent] = { children: [], totalPending: 0, hasMessages: false };
           }
@@ -983,6 +984,12 @@ GET /api/inbox/your-name to check replies</code>
             groups[parent].children.push(inbox);
           }
         }
+        
+        // Sort groups: defaults first (in order), then others alphabetically
+        const sortedParents = [
+          ...defaultParents.filter(p => groups[p]),
+          ...Object.keys(groups).filter(p => !defaultParents.includes(p)).sort()
+        ];
 
         // Fetch message counts for all inboxes
         const inboxData = {};
@@ -1021,7 +1028,9 @@ GET /api/inbox/your-name to check replies</code>
 
         let html = '';
 
-        for (const [parent, group] of Object.entries(groups)) {
+        // Use sorted parents to render in correct order
+        for (const parent of sortedParents) {
+          const group = groups[parent];
           const hasChildren = group.children.length > 0;
           const shouldExpand = expandState[parent] !== undefined ? expandState[parent] : !collapseDefault;
           const parentData = inboxData[parent] || { messages: [], pending: 0 };
