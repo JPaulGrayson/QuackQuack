@@ -122,6 +122,28 @@ export function runCleanup(): { cleaned: number; removedInboxes: string[] } {
   return { cleaned, removedInboxes: emptyInboxes };
 }
 
+// Validate inbox path format (must be platform/application, not just a single name)
+// Top-level identities like "orchestrate" should be "replit/orchestrate" or "claude/orchestrate"
+export function validateInboxPath(to: string): { valid: boolean; error?: string } {
+  const parts = to.split('/').filter(p => p.length > 0);
+  
+  if (parts.length < 2) {
+    return { 
+      valid: false, 
+      error: `Invalid inbox path "${to}". Messages must be sent to platform/application format (e.g., "replit/orchestrate", "claude/project-alpha"). Got single identifier "${to}" instead.`
+    };
+  }
+  
+  if (parts.length > 3) {
+    return {
+      valid: false,
+      error: `Inbox path "${to}" has too many levels. Maximum depth is 3 (platform/application/subtask).`
+    };
+  }
+  
+  return { valid: true };
+}
+
 // Send a message
 export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMessage {
   const now = new Date();

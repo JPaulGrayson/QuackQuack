@@ -22,7 +22,8 @@ import {
   getStats,
   getThreadMessages,
   getAllThreads,
-  runCleanup
+  runCleanup,
+  validateInboxPath
 } from './store.js';
 import { SendMessageRequest, VALID_STATUSES, MessageStatus, QuackMessage } from './types.js';
 import { QuackStore, Dispatcher } from '../packages/@quack/core/dist/index.js';
@@ -90,6 +91,15 @@ app.post('/api/send', (req, res) => {
     
     if (!request.to || !request.task) {
       return res.status(400).json({ error: 'Missing required fields: to, task' });
+    }
+    
+    // Validate inbox path format (must be platform/application)
+    const pathValidation = validateInboxPath(request.to);
+    if (!pathValidation.valid) {
+      return res.status(400).json({ 
+        error: pathValidation.error,
+        hint: 'Use format: platform/application (e.g., "replit/orchestrate", "claude/my-project")'
+      });
     }
     
     // Resolve file references if present
