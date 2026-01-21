@@ -129,6 +129,8 @@ CoWork is an optional orchestration layer that wraps Quack Direct. Phase 1 imple
 - Agents register with name, category (autonomous/conversational/supervised), approval settings
 - Default agents pre-registered: claude, gpt, gemini, grok, copilot (conversational), replit, cursor, antigravity (autonomous)
 - Last activity tracking updates when agents check their inbox
+- **Platform URL**: URL to open when notifying agent (e.g., "https://claude.ai")
+- **Notify Prompt**: Text to copy/paste when notifying agent (e.g., "Check your Quack inbox at /claude")
 
 **Phase 1 - Routing Logic:**
 - Messages include `routing` field: "direct" (default) or "cowork"
@@ -173,6 +175,9 @@ New endpoints:
 - **Browser Notifications**: Desktop notifications for new messages when tab is hidden. Opt-in via Settings modal.
 - **Notification Settings**: Settings modal includes checkboxes for sound and browser notifications with test button.
 - **Stats Display**: Shows Inboxes, Messages, Pending, Approved, and In Progress counts.
+- **Mission Control**: Button opens Quack + Claude.ai side-by-side for streamlined approval workflow
+- **Agent Edit Modal**: Click on agents in Agents tab to edit platformUrl and notifyPrompt
+- **Enhanced Approve Button**: Opens platformUrl in new tab and shows toast with notifyPrompt to copy
 
 ## @quack/core Package
 

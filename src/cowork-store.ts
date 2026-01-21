@@ -62,6 +62,8 @@ function registerDefaultAgents(): void {
       requiresApproval: agent.requiresApproval!,
       autoApproveOnCheck: !agent.requiresApproval,
       notifyVia: 'polling',
+      platformUrl: agent.platformUrl,
+      notifyPrompt: agent.notifyPrompt,
       registeredAt: new Date().toISOString(),
     };
   }

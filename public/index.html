@@ -1688,13 +1688,24 @@ GET /api/inbox/your-name to check replies</code>
       const notifyPrompt = document.getElementById('agent-edit-notifyPrompt').value.trim();
       
       try {
+        // First fetch existing agent config to preserve other fields
+        const existingRes = await fetch(`${API_BASE}/api/cowork/agents/${name}`);
+        let existingAgent = {};
+        if (existingRes.ok) {
+          const data = await existingRes.json();
+          existingAgent = data.agent || {};
+        }
+        
+        // Merge with existing config to preserve fields like notifyVia, webhookUrl, etc.
         const res = await fetch(`${API_BASE}/api/cowork/agents`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            ...existingAgent,
             name,
             category,
             requiresApproval: category === 'conversational',
+            autoApproveOnCheck: category !== 'conversational',
             platformUrl: platformUrl || undefined,
             notifyPrompt: notifyPrompt || undefined
           })
@@ -2028,32 +2039,41 @@ GET /api/inbox/your-name to check replies</code>
     // Approve message (for Orchestrate workflow) - enhanced with platform URL + notify prompt
     async function approveMsg(messageId) {
       // Get message first to find target agent
-      const msgRes = await fetch(`${API_BASE}/api/message/${messageId}`);
-      const message = await msgRes.json();
+      let message = null;
+      try {
+        const msgRes = await fetch(`${API_BASE}/api/message/${messageId}`);
+        if (msgRes.ok) {
+          message = await msgRes.json();
+        }
+      } catch (e) {
+        console.log('Could not fetch message:', e);
+      }
       
       // Approve the message
       await fetch(`${API_BASE}/api/approve/${messageId}`, { method: 'POST' });
       playQuackSound('send');
       
-      // Get target agent's platform info
-      const targetAgent = message.to.split('/')[0];
-      try {
-        const agentRes = await fetch(`${API_BASE}/api/cowork/agents/${targetAgent}`);
-        if (agentRes.ok) {
-          const { agent } = await agentRes.json();
-          
-          // Open platform URL if available
-          if (agent.platformUrl) {
-            window.open(agent.platformUrl, '_blank');
+      // Get target agent's platform info (only if we have the message)
+      if (message && message.to) {
+        const targetAgent = message.to.split('/')[0];
+        try {
+          const agentRes = await fetch(`${API_BASE}/api/cowork/agents/${targetAgent}`);
+          if (agentRes.ok) {
+            const { agent } = await agentRes.json();
+            
+            // Open platform URL if available
+            if (agent && agent.platformUrl) {
+              window.open(agent.platformUrl, '_blank');
+            }
+            
+            // Show notify prompt toast if available
+            if (agent && agent.notifyPrompt) {
+              showNotifyPromptToast(agent.notifyPrompt, agent.name);
+            }
           }
-          
-          // Show notify prompt toast if available
-          if (agent.notifyPrompt) {
-            showNotifyPromptToast(agent.notifyPrompt, agent.name);
-          }
+        } catch (e) {
+          console.log('Could not fetch agent info:', e);
         }
-      } catch (e) {
-        console.log('Could not fetch agent info:', e);
       }
       
       loadStats();
@@ -2061,28 +2081,45 @@ GET /api/inbox/your-name to check replies</code>
       closeModal();
     }
     
+    // Store notify prompt for copy button (avoid escaping issues)
+    let currentNotifyPrompt = '';
+    
     // Show toast with notify prompt and copy button
     function showNotifyPromptToast(prompt, agentName) {
       const container = document.getElementById('toast-container');
       
+      // Store raw prompt for copy
+      currentNotifyPrompt = prompt;
+      
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.style.borderColor = '#4caf50';
-      toast.innerHTML = `
-        <div class="toast-header">
-          <span class="toast-title" style="color: #4caf50;">📋 Copy & Paste to ${agentName}</span>
-          <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
-        </div>
-        <div class="toast-body" style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
-          ${escapeHtml(prompt)}
-        </div>
-        <div class="toast-actions">
-          <button class="btn btn-primary" onclick="copyNotifyPrompt('${escapeHtml(prompt).replace(/'/g, "\\'")}', this)" style="background: #4caf50;">
-            📋 Copy
-          </button>
-        </div>
+      
+      const header = document.createElement('div');
+      header.className = 'toast-header';
+      header.innerHTML = `
+        <span class="toast-title" style="color: #4caf50;">📋 Copy & Paste to ${escapeHtml(agentName)}</span>
+        <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
       `;
       
+      const body = document.createElement('div');
+      body.className = 'toast-body';
+      body.style.cssText = 'font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;';
+      body.textContent = prompt; // Use textContent to safely display without escaping issues
+      
+      const actions = document.createElement('div');
+      actions.className = 'toast-actions';
+      
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn btn-primary';
+      copyBtn.style.background = '#4caf50';
+      copyBtn.textContent = '📋 Copy';
+      copyBtn.onclick = function() { copyCurrentNotifyPrompt(this); };
+      actions.appendChild(copyBtn);
+      
+      toast.appendChild(header);
+      toast.appendChild(body);
+      toast.appendChild(actions);
       container.appendChild(toast);
       
       // Auto-remove after 15 seconds
@@ -2091,10 +2128,10 @@ GET /api/inbox/your-name to check replies</code>
       }, 15000);
     }
     
-    // Copy notify prompt to clipboard
-    async function copyNotifyPrompt(text, button) {
+    // Copy current notify prompt to clipboard
+    async function copyCurrentNotifyPrompt(button) {
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(currentNotifyPrompt);
         button.textContent = '✓ Copied!';
         button.style.background = '#2e7d32';
         setTimeout(() => {
@@ -2105,7 +2142,7 @@ GET /api/inbox/your-name to check replies</code>
         console.error('Failed to copy:', e);
         // Fallback for older browsers
         const textarea = document.createElement('textarea');
-        textarea.value = text;
+        textarea.value = currentNotifyPrompt;
         document.body.appendChild(textarea);
         textarea.select();
         document.execCommand('copy');

@@ -1,0 +1,90 @@
+{
+  "agents": {
+    "claude": {
+      "name": "claude",
+      "category": "conversational",
+      "requiresApproval": true,
+      "autoApproveOnCheck": false,
+      "notifyVia": "polling",
+      "platformUrl": "https://claude.ai",
+      "notifyPrompt": "Check your Quack inbox at /claude",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:12.873Z"
+    },
+    "gpt": {
+      "name": "gpt",
+      "category": "conversational",
+      "requiresApproval": true,
+      "autoApproveOnCheck": false,
+      "notifyVia": "polling",
+      "platformUrl": "https://chat.openai.com",
+      "notifyPrompt": "Check your Quack inbox at /gpt",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:13.020Z"
+    },
+    "gemini": {
+      "name": "gemini",
+      "category": "conversational",
+      "requiresApproval": true,
+      "autoApproveOnCheck": false,
+      "notifyVia": "polling",
+      "platformUrl": "https://gemini.google.com",
+      "notifyPrompt": "Check your Quack inbox at /gemini",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:13.005Z"
+    },
+    "grok": {
+      "name": "grok",
+      "category": "conversational",
+      "requiresApproval": true,
+      "autoApproveOnCheck": false,
+      "notifyVia": "polling",
+      "platformUrl": "https://grok.x.ai",
+      "notifyPrompt": "Check your Quack inbox at /grok",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:13.024Z"
+    },
+    "copilot": {
+      "name": "copilot",
+      "category": "conversational",
+      "requiresApproval": true,
+      "autoApproveOnCheck": false,
+      "notifyVia": "polling",
+      "platformUrl": "https://copilot.microsoft.com",
+      "notifyPrompt": "Check your Quack inbox at /copilot",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:12.772Z"
+    },
+    "replit": {
+      "name": "replit",
+      "category": "autonomous",
+      "requiresApproval": false,
+      "autoApproveOnCheck": true,
+      "notifyVia": "polling",
+      "platformUrl": "https://replit.com",
+      "notifyPrompt": "Check your Quack inbox",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:13.112Z"
+    },
+    "cursor": {
+      "name": "cursor",
+      "category": "autonomous",
+      "requiresApproval": false,
+      "autoApproveOnCheck": true,
+      "notifyVia": "polling",
+      "notifyPrompt": "Check your Quack inbox at /cursor",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:13.025Z"
+    },
+    "antigravity": {
+      "name": "antigravity",
+      "category": "autonomous",
+      "requiresApproval": false,
+      "autoApproveOnCheck": true,
+      "notifyVia": "polling",
+      "registeredAt": "2026-01-21T16:24:57.197Z",
+      "lastActivity": "2026-01-21T16:27:12.783Z"
+    }
+  },
+  "routedMessages": {}
+}
