@@ -2222,14 +2222,12 @@ GET /api/inbox/your-name to check replies</code>
           if (agentRes.ok) {
             const { agent } = await agentRes.json();
             
-            // Open platform URL if available
-            if (agent && agent.platformUrl) {
-              window.open(agent.platformUrl, '_blank');
-            }
-            
-            // Show notify prompt toast if available
+            // Show notify prompt toast with platform link (no auto-open)
             if (agent && agent.notifyPrompt) {
-              showNotifyPromptToast(agent.notifyPrompt, agent.name);
+              showNotifyPromptToast(agent.notifyPrompt, agent.name, agent.platformUrl);
+            } else if (agent && agent.platformUrl) {
+              // Just show simple approval toast with link
+              showApprovalToast(agent.name, agent.platformUrl);
             }
           }
         } catch (e) {
@@ -2245,8 +2243,8 @@ GET /api/inbox/your-name to check replies</code>
     // Store notify prompt for copy button (avoid escaping issues)
     let currentNotifyPrompt = '';
     
-    // Show toast with notify prompt and copy button
-    function showNotifyPromptToast(prompt, agentName) {
+    // Show toast with notify prompt and copy button (no auto-open window)
+    function showNotifyPromptToast(prompt, agentName, platformUrl) {
       const container = document.getElementById('toast-container');
       
       // Store raw prompt for copy
@@ -2259,7 +2257,7 @@ GET /api/inbox/your-name to check replies</code>
       const header = document.createElement('div');
       header.className = 'toast-header';
       header.innerHTML = `
-        <span class="toast-title" style="color: #4caf50;">📋 Copy & Paste to ${escapeHtml(agentName)}</span>
+        <span class="toast-title" style="color: #4caf50;">✓ Approved! Notify ${escapeHtml(agentName)}</span>
         <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
       `;
       
@@ -2270,6 +2268,7 @@ GET /api/inbox/your-name to check replies</code>
       
       const actions = document.createElement('div');
       actions.className = 'toast-actions';
+      actions.style.cssText = 'display: flex; gap: 0.5rem;';
       
       const copyBtn = document.createElement('button');
       copyBtn.className = 'btn btn-primary';
@@ -2277,6 +2276,16 @@ GET /api/inbox/your-name to check replies</code>
       copyBtn.textContent = '📋 Copy';
       copyBtn.onclick = function() { copyCurrentNotifyPrompt(this); };
       actions.appendChild(copyBtn);
+      
+      // Add optional "Open" button for platform URL (user clicks manually)
+      if (platformUrl) {
+        const openBtn = document.createElement('button');
+        openBtn.className = 'btn btn-primary';
+        openBtn.style.background = '#2196f3';
+        openBtn.textContent = '🔗 Open';
+        openBtn.onclick = function() { window.open(platformUrl, '_blank'); };
+        actions.appendChild(openBtn);
+      }
       
       toast.appendChild(header);
       toast.appendChild(body);
@@ -2287,6 +2296,30 @@ GET /api/inbox/your-name to check replies</code>
       setTimeout(() => {
         if (toast.parentNode) toast.remove();
       }, 15000);
+    }
+    
+    // Show simple approval toast with link (no notify prompt)
+    function showApprovalToast(agentName, platformUrl) {
+      const container = document.getElementById('toast-container');
+      
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.borderColor = '#4caf50';
+      toast.innerHTML = `
+        <div class="toast-header">
+          <span class="toast-title" style="color: #4caf50;">✓ Approved for ${escapeHtml(agentName)}</span>
+          <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
+        </div>
+        <div class="toast-body">
+          ${platformUrl ? `<a href="${escapeHtml(platformUrl)}" target="_blank" style="color: #00d9ff;">Open ${escapeHtml(agentName)} platform →</a>` : 'Message approved and ready for processing.'}
+        </div>
+      `;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 8000);
     }
     
     // Copy current notify prompt to clipboard
