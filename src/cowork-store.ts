@@ -125,14 +125,24 @@ export function shouldAutoApprove(fromAgent: string, toAgent: string): boolean {
   const from = data.agents[fromAgent];
   const to = data.agents[toAgent];
   
+  // Unknown agents: auto-approve
   if (!from && !to) {
     return true;
   }
   
+  // Messages TO conversational agents: auto-approve
+  // They're already in conversation, no need to wake them up or show approve button
+  if (to?.category === 'conversational') {
+    return true;
+  }
+  
+  // Explicit approval required for autonomous agents: don't auto-approve
   if (to?.requiresApproval) {
     return false;
   }
   
+  // Messages FROM conversational agents TO autonomous agents: need approval
+  // Human needs to approve before automation wakes up the autonomous agent
   if (from?.category === 'conversational') {
     return false;
   }
