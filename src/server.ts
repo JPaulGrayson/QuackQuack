@@ -405,8 +405,12 @@ app.post('/api/approve/:id', (req, res) => {
     ? `quack id:${shortId} "${userComment}"`
     : `quack id:${shortId}`;
   
-  // Skip automation for automation requests (prevent recursion)
-  if (claudeOnline && targetAgent?.platformUrl && !isAutomationRequest) {
+  // Skip automation for:
+  // 1. Automation requests (prevent recursion)
+  // 2. Conversational agents (they're already in the conversation, no need to wake them)
+  const isTargetAutonomous = targetAgent?.category === 'autonomous';
+  
+  if (claudeOnline && targetAgent?.platformUrl && !isAutomationRequest && isTargetAutonomous) {
     // Send automation request to Claude's inbox
     const automationRequest = {
       action: 'notify-agent',
