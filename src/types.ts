@@ -24,6 +24,24 @@ export interface QuackFile {
 // Message priority levels
 export type MessagePriority = 'low' | 'normal' | 'high' | 'urgent';
 
+// Routing types for CoWork
+export type RoutingType = 'direct' | 'cowork';
+
+// Agent category for CoWork routing
+export type AgentCategory = 'conversational' | 'autonomous' | 'supervised';
+
+// Agent configuration for CoWork
+export interface AgentConfig {
+  name: string;                    // agent identifier (e.g., "claude", "replit")
+  category: AgentCategory;         // how messages are handled
+  requiresApproval: boolean;       // needs human approval?
+  autoApproveOnCheck: boolean;     // auto-approve when agent polls inbox
+  notifyVia: 'polling' | 'webhook' | 'websocket';
+  webhookUrl?: string;             // for webhook notifications
+  lastActivity?: string;           // ISO 8601 timestamp of last activity
+  registeredAt: string;            // ISO 8601 timestamp
+}
+
 // Core message format
 export interface QuackMessage {
   id: string;
@@ -48,6 +66,10 @@ export interface QuackMessage {
   priority?: MessagePriority;   // message priority
   tags?: string[];              // arbitrary tags for organization
   
+  // CoWork routing
+  routing?: RoutingType;        // 'direct' (default) or 'cowork'
+  routedAt?: string;            // when message was routed via CoWork
+  
   // Threading
   replyTo?: string;             // message ID this is replying to
   threadId?: string;            // thread ID linking conversation
@@ -70,6 +92,8 @@ export interface SendMessageRequest {
   project?: string;             // project identifier for filtering
   priority?: MessagePriority;   // message priority (low/normal/high/urgent)
   tags?: string[];              // arbitrary tags for organization
+  // CoWork routing
+  routing?: RoutingType;        // 'direct' (default) or 'cowork'
 }
 
 export interface InboxResponse {
