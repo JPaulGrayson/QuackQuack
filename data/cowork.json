@@ -9,7 +9,7 @@
       "platformUrl": "https://claude.ai",
       "notifyPrompt": "Check your Quack inbox at /claude",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-21T16:47:04.699Z"
+      "lastActivity": "2026-01-21T18:24:37.303Z"
     },
     "gpt": {
       "name": "gpt",
@@ -64,7 +64,7 @@
       "platformUrl": "https://replit.com",
       "notifyPrompt": "Check your Quack inbox",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-21T16:47:04.905Z"
+      "lastActivity": "2026-01-21T18:24:49.774Z"
     },
     "cursor": {
       "name": "cursor",
