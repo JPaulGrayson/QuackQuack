@@ -1898,13 +1898,22 @@ GET /api/inbox/your-name to check replies</code>
 
     // ============== Refresh Dashboard ==============
     function refreshDashboard() {
-      loadStats();
-      loadInboxes();
-      loadAgents();
-      loadThreads();
-      loadAuditStats();
-      loadAuditLogs();
-      loadRoutingMessages();
+      const btn = event.target;
+      btn.textContent = '⏳ Loading...';
+      btn.disabled = true;
+      
+      Promise.all([
+        loadStats(),
+        loadInboxes(),
+        loadAgents(),
+        loadThreads(),
+        loadAuditStats(),
+        loadAuditLogs(),
+        loadRoutingMessages()
+      ]).finally(() => {
+        btn.textContent = '🔄 Refresh';
+        btn.disabled = false;
+      });
     }
 
     // ============== Mission Control ==============
