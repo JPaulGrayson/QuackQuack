@@ -160,6 +160,10 @@ app.get('/api/inbox/:name', (req, res) => {
   const includeRead = req.query.includeRead === 'true';
   const autoApprove = req.query.autoApprove === 'true';
   
+  // Update last activity for this agent (CoWork tracking)
+  const agentName = inbox.split('/')[0];
+  updateLastActivity(agentName);
+  
   const messages = checkInbox(inbox, includeRead, autoApprove);
   
   res.json({
@@ -176,6 +180,9 @@ app.get('/api/inbox/:parent/:child', (req, res) => {
   const includeRead = req.query.includeRead === 'true';
   const autoApprove = req.query.autoApprove === 'true';
   
+  // Update last activity for this agent (CoWork tracking)
+  updateLastActivity(req.params.parent);
+  
   const messages = checkInbox(inbox, includeRead, autoApprove);
   
   res.json({
@@ -191,6 +198,9 @@ app.get('/api/inbox/:parent/:child/:subchild', (req, res) => {
   const inbox = `${req.params.parent}/${req.params.child}/${req.params.subchild}`;
   const includeRead = req.query.includeRead === 'true';
   const autoApprove = req.query.autoApprove === 'true';
+  
+  // Update last activity for this agent (CoWork tracking)
+  updateLastActivity(req.params.parent);
   
   const messages = checkInbox(inbox, includeRead, autoApprove);
   
