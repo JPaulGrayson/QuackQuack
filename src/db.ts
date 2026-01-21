@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { randomUUID } from 'crypto';
 import { QuackMessage } from './types.js';
 
 const pool = new Pool({
@@ -50,7 +51,7 @@ export async function archiveThread(
   messages: QuackMessage[],
   metadata: Record<string, unknown> = {}
 ): Promise<string> {
-  const id = crypto.randomUUID();
+  const id = randomUUID();
   const participants = [...new Set(messages.flatMap(m => [m.from, m.to]))];
   const timestamps = messages.map(m => new Date(m.timestamp));
   const firstMessageAt = new Date(Math.min(...timestamps.map(d => d.getTime())));

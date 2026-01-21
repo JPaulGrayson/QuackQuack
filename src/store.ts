@@ -61,11 +61,39 @@ function persistStore(): void {
 }
 
 // Clean up expired messages and empty inboxes
-function cleanupExpired(): void {
+// Archives completed threads before removal
+async function cleanupExpired(): Promise<void> {
   const now = new Date();
   let cleaned = 0;
   const emptyInboxes: string[] = [];
+  const archivedThreads = new Set<string>();
   
+  // First pass: collect threads to archive (completed messages about to expire)
+  for (const [inbox, messages] of inboxes) {
+    for (const msg of messages) {
+      const expires = new Date(msg.expiresAt);
+      if (expires <= now && msg.status === 'completed' && msg.threadId) {
+        if (!archivedThreads.has(msg.threadId)) {
+          archivedThreads.add(msg.threadId);
+        }
+      }
+    }
+  }
+  
+  // Archive completed threads before cleanup
+  for (const threadId of archivedThreads) {
+    try {
+      const threadMessages = getThreadMessages(threadId);
+      if (threadMessages.length > 0) {
+        await archiveThread(threadId, threadMessages, { archivedReason: 'expiration_cleanup' });
+        console.log(`📦 Archived thread ${threadId.substring(0, 8)}... (${threadMessages.length} messages)`);
+      }
+    } catch (e) {
+      console.error(`Failed to archive thread ${threadId}:`, e);
+    }
+  }
+  
+  // Second pass: remove expired messages
   for (const [inbox, messages] of inboxes) {
     const valid = messages.filter(m => {
       const expires = new Date(m.expiresAt);
@@ -292,6 +320,13 @@ export function receiveMessage(messageId: string): QuackMessage | null {
       message.readAt = new Date().toISOString();
       persistStore();
       console.log(`📬 Message ${messageId} marked as read`);
+      
+      // Audit log
+      logAudit('message.read', message.to, 'message', messageId, {
+        from: message.from,
+        threadId: message.threadId
+      }).catch(e => console.error('Audit log failed:', e));
+      
       return message;
     }
   }
