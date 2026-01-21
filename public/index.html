@@ -905,6 +905,7 @@
     <div class="view-toggle" style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
       <button class="btn btn-primary" id="inbox-view-btn" onclick="showInboxView()">📥 Inboxes</button>
       <button class="btn btn-secondary" id="thread-view-btn" onclick="showThreadView()">💬 Threads</button>
+      <button class="btn btn-secondary" id="cowork-view-btn" onclick="showCoWorkView()">🤖 Agents</button>
     </div>
 
     <div class="inboxes" id="inboxes">
@@ -913,6 +914,26 @@
 
     <div class="threads" id="threads" style="display: none;">
       <!-- Thread list will be rendered here -->
+    </div>
+
+    <div class="cowork-view" id="cowork" style="display: none;">
+      <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="stat" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3);">
+          <div class="stat-value" id="agents-online">-</div>
+          <div class="stat-label">Online</div>
+        </div>
+        <div class="stat" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3);">
+          <div class="stat-value" id="agents-autonomous">-</div>
+          <div class="stat-label">Autonomous</div>
+        </div>
+        <div class="stat" style="background: rgba(255, 152, 0, 0.1); border-color: rgba(255, 152, 0, 0.3);">
+          <div class="stat-value" id="agents-conversational">-</div>
+          <div class="stat-label">Conversational</div>
+        </div>
+      </div>
+      <div class="agents-grid" id="agents-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        <!-- Agent cards will be rendered here -->
+      </div>
     </div>
 
     <div class="setup-section">
@@ -1206,21 +1227,105 @@ GET /api/inbox/your-name to check replies</code>
       currentView = 'inbox';
       document.getElementById('inboxes').style.display = 'grid';
       document.getElementById('threads').style.display = 'none';
+      document.getElementById('cowork').style.display = 'none';
       document.getElementById('inbox-view-btn').classList.add('btn-primary');
       document.getElementById('inbox-view-btn').classList.remove('btn-secondary');
       document.getElementById('thread-view-btn').classList.add('btn-secondary');
       document.getElementById('thread-view-btn').classList.remove('btn-primary');
+      document.getElementById('cowork-view-btn').classList.add('btn-secondary');
+      document.getElementById('cowork-view-btn').classList.remove('btn-primary');
     }
 
     function showThreadView() {
       currentView = 'threads';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'grid';
+      document.getElementById('cowork').style.display = 'none';
       document.getElementById('inbox-view-btn').classList.add('btn-secondary');
       document.getElementById('inbox-view-btn').classList.remove('btn-primary');
       document.getElementById('thread-view-btn').classList.add('btn-primary');
       document.getElementById('thread-view-btn').classList.remove('btn-secondary');
+      document.getElementById('cowork-view-btn').classList.add('btn-secondary');
+      document.getElementById('cowork-view-btn').classList.remove('btn-primary');
       loadThreads();
+    }
+
+    function showCoWorkView() {
+      currentView = 'cowork';
+      document.getElementById('inboxes').style.display = 'none';
+      document.getElementById('threads').style.display = 'none';
+      document.getElementById('cowork').style.display = 'block';
+      document.getElementById('inbox-view-btn').classList.add('btn-secondary');
+      document.getElementById('inbox-view-btn').classList.remove('btn-primary');
+      document.getElementById('thread-view-btn').classList.add('btn-secondary');
+      document.getElementById('thread-view-btn').classList.remove('btn-primary');
+      document.getElementById('cowork-view-btn').classList.add('btn-primary');
+      document.getElementById('cowork-view-btn').classList.remove('btn-secondary');
+      loadAgents();
+    }
+
+    async function loadAgents() {
+      try {
+        const [agentsRes, statusRes] = await Promise.all([
+          fetch(`${API_BASE}/api/cowork/agents`),
+          fetch(`${API_BASE}/api/cowork/status`)
+        ]);
+        const { agents } = await agentsRes.json();
+        const { agents: stats } = await statusRes.json();
+
+        document.getElementById('agents-online').textContent = stats.onlineAgents;
+        document.getElementById('agents-autonomous').textContent = stats.autonomous;
+        document.getElementById('agents-conversational').textContent = stats.conversational;
+
+        const grid = document.getElementById('agents-grid');
+        const now = new Date();
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+
+        grid.innerHTML = agents.map(agent => {
+          const isOnline = agent.lastActivity && new Date(agent.lastActivity) > fiveMinutesAgo;
+          const lastSeen = agent.lastActivity 
+            ? formatTimeAgo(new Date(agent.lastActivity))
+            : 'Never';
+          
+          const categoryColor = agent.category === 'autonomous' 
+            ? 'rgba(76, 175, 80, 0.3)' 
+            : agent.category === 'conversational'
+            ? 'rgba(255, 152, 0, 0.3)'
+            : 'rgba(156, 39, 176, 0.3)';
+          
+          const statusDot = isOnline 
+            ? '<span style="color: #4caf50;">●</span>' 
+            : '<span style="color: #666;">○</span>';
+
+          return `
+            <div class="inbox-card" style="border-color: ${categoryColor};">
+              <div class="inbox-header">
+                <span class="inbox-name" style="display: flex; align-items: center; gap: 0.5rem;">
+                  ${statusDot} /${agent.name}
+                </span>
+                <span class="pending-badge" style="background: ${categoryColor}; color: #fff;">
+                  ${agent.category}
+                </span>
+              </div>
+              <div style="color: #888; font-size: 0.85rem; margin-top: 0.5rem;">
+                <div>Approval: ${agent.requiresApproval ? 'Required' : 'Auto'}</div>
+                <div>Notify via: ${agent.notifyVia}</div>
+                <div>Last seen: ${lastSeen}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error('Failed to load agents:', e);
+      }
+    }
+
+    function formatTimeAgo(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'Just now';
+      if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+      return Math.floor(seconds / 86400) + 'd ago';
     }
 
     async function loadThreads() {
