@@ -45,13 +45,13 @@ export function initCoWorkStore(): void {
 
 function registerDefaultAgents(): void {
   const defaults: Partial<AgentConfig>[] = [
-    { name: 'claude', category: 'conversational', requiresApproval: true },
-    { name: 'gpt', category: 'conversational', requiresApproval: true },
-    { name: 'gemini', category: 'conversational', requiresApproval: true },
-    { name: 'grok', category: 'conversational', requiresApproval: true },
-    { name: 'copilot', category: 'conversational', requiresApproval: true },
-    { name: 'replit', category: 'autonomous', requiresApproval: false },
-    { name: 'cursor', category: 'autonomous', requiresApproval: false },
+    { name: 'claude', category: 'conversational', requiresApproval: true, platformUrl: 'https://claude.ai', notifyPrompt: 'Check your Quack inbox at /claude' },
+    { name: 'gpt', category: 'conversational', requiresApproval: true, platformUrl: 'https://chat.openai.com', notifyPrompt: 'Check your Quack inbox at /gpt' },
+    { name: 'gemini', category: 'conversational', requiresApproval: true, platformUrl: 'https://gemini.google.com', notifyPrompt: 'Check your Quack inbox at /gemini' },
+    { name: 'grok', category: 'conversational', requiresApproval: true, platformUrl: 'https://grok.x.ai', notifyPrompt: 'Check your Quack inbox at /grok' },
+    { name: 'copilot', category: 'conversational', requiresApproval: true, platformUrl: 'https://copilot.microsoft.com', notifyPrompt: 'Check your Quack inbox at /copilot' },
+    { name: 'replit', category: 'autonomous', requiresApproval: false, platformUrl: 'https://replit.com', notifyPrompt: 'Check your Quack inbox' },
+    { name: 'cursor', category: 'autonomous', requiresApproval: false, notifyPrompt: 'Check your Quack inbox at /cursor' },
     { name: 'antigravity', category: 'autonomous', requiresApproval: false },
   ];
   
@@ -86,6 +86,8 @@ export function registerAgent(config: Partial<AgentConfig>): AgentConfig {
     autoApproveOnCheck: config.autoApproveOnCheck ?? true,
     notifyVia: config.notifyVia || 'polling',
     webhookUrl: config.webhookUrl,
+    platformUrl: config.platformUrl,
+    notifyPrompt: config.notifyPrompt,
     registeredAt: data.agents[config.name!]?.registeredAt || now,
     lastActivity: now,
   };

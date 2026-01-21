@@ -38,6 +38,8 @@ export interface AgentConfig {
   autoApproveOnCheck: boolean;     // auto-approve when agent polls inbox
   notifyVia: 'polling' | 'webhook' | 'websocket';
   webhookUrl?: string;             // for webhook notifications
+  platformUrl?: string;            // URL to open when notifying agent (e.g., "https://replit.com/@paul/quack")
+  notifyPrompt?: string;           // Prompt text to paste when notifying agent
   lastActivity?: string;           // ISO 8601 timestamp of last activity
   registeredAt: string;            // ISO 8601 timestamp
 }
