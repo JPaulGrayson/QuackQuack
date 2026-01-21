@@ -879,6 +879,7 @@
       <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
         <a href="/setup" class="setup-link">📖 Setup Guide</a>
         <button class="setup-link" onclick="launchMissionControl()" style="border: none; cursor: pointer;">🚀 Mission Control</button>
+        <button class="setup-link" onclick="refreshDashboard()" style="border: none; cursor: pointer; background: #2a3a4a;">🔄 Refresh</button>
       </div>
     </header>
 
@@ -1894,6 +1895,17 @@ GET /api/inbox/your-name to check replies</code>
         });
       }
     });
+
+    // ============== Refresh Dashboard ==============
+    function refreshDashboard() {
+      loadStats();
+      loadInboxes();
+      loadAgents();
+      loadThreads();
+      loadAuditStats();
+      loadAuditLogs();
+      loadRoutingMessages();
+    }
 
     // ============== Mission Control ==============
     function launchMissionControl() {
