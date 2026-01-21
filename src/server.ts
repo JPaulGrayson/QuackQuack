@@ -186,6 +186,22 @@ app.post('/api/send', (req, res) => {
       });
     }
     
+    // Consolidate conversational agent inboxes to root
+    // e.g., claude/inbox, claude/project -> claude (with project metadata preserved)
+    const CONVERSATIONAL_AGENTS = ['claude', 'gpt', 'gemini', 'grok', 'copilot'];
+    let targetInbox = request.to.replace(/^\/+/, ''); // Remove leading slashes
+    const rootAgent = targetInbox.split('/')[0].toLowerCase();
+    
+    if (CONVERSATIONAL_AGENTS.includes(rootAgent) && targetInbox.includes('/')) {
+      // Consolidate to root inbox for conversational agents
+      targetInbox = rootAgent;
+      request.to = rootAgent;
+      // Ensure project metadata exists for root inbox delivery
+      if (!request.project) {
+        request.project = 'inbox';
+      }
+    }
+    
     // Validate inbox path format
     // Root inboxes (e.g., /claude) are allowed when project metadata is provided
     const hasProjectMetadata = !!(request.project || request.tags?.length);
