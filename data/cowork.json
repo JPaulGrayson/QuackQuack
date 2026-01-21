@@ -7,7 +7,7 @@
       "autoApproveOnCheck": false,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:52:24.025Z"
+      "lastActivity": "2026-01-21T04:27:25.129Z"
     },
     "gpt": {
       "name": "gpt",
@@ -16,7 +16,7 @@
       "autoApproveOnCheck": false,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.535Z"
+      "lastActivity": "2026-01-21T04:27:25.112Z"
     },
     "gemini": {
       "name": "gemini",
@@ -25,7 +25,7 @@
       "autoApproveOnCheck": false,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.533Z"
+      "lastActivity": "2026-01-21T04:27:25.104Z"
     },
     "grok": {
       "name": "grok",
@@ -34,7 +34,7 @@
       "autoApproveOnCheck": false,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.537Z"
+      "lastActivity": "2026-01-21T04:27:25.114Z"
     },
     "copilot": {
       "name": "copilot",
@@ -43,7 +43,7 @@
       "autoApproveOnCheck": false,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.552Z"
+      "lastActivity": "2026-01-21T04:27:25.123Z"
     },
     "replit": {
       "name": "replit",
@@ -52,7 +52,7 @@
       "autoApproveOnCheck": true,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.573Z"
+      "lastActivity": "2026-01-21T04:27:25.133Z"
     },
     "cursor": {
       "name": "cursor",
@@ -61,7 +61,7 @@
       "autoApproveOnCheck": true,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.562Z"
+      "lastActivity": "2026-01-21T04:27:25.131Z"
     },
     "antigravity": {
       "name": "antigravity",
@@ -70,7 +70,7 @@
       "autoApproveOnCheck": true,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T01:56:03.397Z",
-      "lastActivity": "2026-01-21T03:51:34.555Z"
+      "lastActivity": "2026-01-21T04:27:25.124Z"
     },
     "logicart": {
       "name": "logicart",
@@ -82,5 +82,21 @@
       "lastActivity": "2026-01-21T01:59:40.715Z"
     }
   },
-  "routedMessages": {}
+  "routedMessages": {
+    "c637b6da-7b2b-45a2-8ddd-300aa43d1781": {
+      "id": "c637b6da-7b2b-45a2-8ddd-300aa43d1781",
+      "to": "cowork",
+      "from": "test-ui",
+      "timestamp": "2026-01-21T04:24:21.340Z",
+      "expiresAt": "2026-01-23T04:24:21.340Z",
+      "status": "pending",
+      "task": "Testing CoWork UI - this message should appear in the routing tab",
+      "files": [],
+      "routing": "cowork",
+      "routedAt": "2026-01-21T04:24:21.340Z",
+      "destination": "claude",
+      "coworkStatus": "pending",
+      "threadId": "c637b6da-7b2b-45a2-8ddd-300aa43d1781"
+    }
+  }
 }
