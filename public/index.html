@@ -853,7 +853,32 @@
       padding: 0.4rem 0.8rem;
       font-size: 0.8rem;
     }
+    
+    .premium-locked {
+      opacity: 0.5;
+      pointer-events: none;
+      position: relative;
+    }
+    
+    .premium-locked::after {
+      content: '👑';
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 0.8rem;
+    }
+    
+    .premium-badge {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      color: #000;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
   </style>
+  <script src="/voyai-client.js"></script>
 </head>
 
 <body>
@@ -2996,6 +3021,34 @@ GET /api/inbox/your-name to check replies</code>
     initializeMessageCount();
     loadStats();
     loadInboxes();
+    
+    // Initialize Voyai session
+    async function initVoyai() {
+      if (typeof voyai !== 'undefined') {
+        try {
+          const session = await voyai.getSession();
+          if (session.success) {
+            console.log('Voyai session:', session.tier, session.features);
+            updatePremiumUI(session);
+          }
+        } catch (e) {
+          console.log('Voyai not authenticated');
+        }
+      }
+    }
+    
+    function updatePremiumUI(session) {
+      const premiumFeatures = ['control_room', 'multi_inbox', 'toast_notifications'];
+      premiumFeatures.forEach(feature => {
+        const el = document.querySelector(`[data-feature="${feature}"]`);
+        if (el && !session.features?.[feature]) {
+          el.classList.add('premium-locked');
+          el.title = 'Premium feature - upgrade at voyai.org';
+        }
+      });
+    }
+    
+    initVoyai();
 
     // Refresh every 8 seconds and check for new messages
     setInterval(async () => {

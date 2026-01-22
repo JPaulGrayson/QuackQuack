@@ -926,6 +926,31 @@ app.delete('/api/webhooks/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// ============== Voyai Integration ==============
+// Note: Client calls voyai.org directly for session auth (cross-domain cookies)
+// This endpoint is for server-side registration only (lead gen)
+
+app.post('/api/voyai/register', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    const response = await fetch('https://voyai.org/api/quack/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    
+    const data = await response.json();
+    res.json(data);
+  } catch (error: any) {
+    console.error('Voyai register error:', error);
+    res.status(500).json({ error: 'Failed to register with Voyai', details: error.message });
+  }
+});
+
 // ============== SSE Test ==============
 
 app.get('/api/sse-test', (req, res) => {
