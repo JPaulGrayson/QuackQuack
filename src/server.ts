@@ -56,6 +56,7 @@ import {
   getAuditStats,
   logAudit
 } from './db.js';
+import startQuackRouter from './startQuack.js';
 
 // ElevenLabs client for generating duck sounds
 const elevenlabs = process.env.ELEVENLABS_API_KEY 
@@ -108,6 +109,9 @@ const dispatcher = new Dispatcher({ store: storeAdapter, pollInterval: 5000 });
 // In production, register external Replit app URLs here
 dispatcher.registerWebhook('replit', `http://localhost:${PORT}`);
 dispatcher.start();
+
+// StartQuack monitoring router
+app.use('/api/monitor', startQuackRouter);
 
 // ============== REST API ==============
 
