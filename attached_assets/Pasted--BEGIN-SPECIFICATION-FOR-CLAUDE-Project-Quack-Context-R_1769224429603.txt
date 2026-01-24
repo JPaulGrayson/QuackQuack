@@ -1,0 +1,79 @@
+[BEGIN SPECIFICATION FOR CLAUDE]
+Project: Quack Context Recovery & Session Management Goal: Implement a "Flight Recorder" feature for Quack that allows AI agents (both connected swarms and single "vibe coders") to persist their state and recover context after a crash or restart.
+
+1. The Core Concept
+Quack acts as a "Universal Session Manager." It stores an audit trail of agent activities.
+Mode 1 (Swarm): Agents message each other. Quack logs these interactions.
+Mode 2 (Solo): A single agent "journals" its internal state, thoughts, and progress to Quack, even if no other agents are listening.
+The "Start Quack" Loop:
+Save: Agents periodically POST their state/summary to Quack.
+Crash/Restart: User opens a new agent session.
+Restore: User clicks "Start Quack." Quack generates a prompt containing the Latest Context Summary and injects it into the new session.
+2. Data Model (JSON Schema)
+We need a flexible AuditLog entry that handles both "Messages" (to others) and "Thoughts" (to self/Quack).
+
+JSON
+// The Universal Audit Object
+{
+  "session_id": "uuid_string",
+  "timestamp": "ISO_8601_UTC",
+  "agent_id": "string (e.g., 'Claude-Dev-1')",
+  "type": "MESSAGE" | "THOUGHT" | "ERROR" | "CHECKPOINT",
+  "content": "String content or JSON object",
+  "context_snapshot": {
+    // Optional: High-level state summary for quick restoration
+    "current_task": "Building API auth",
+    "last_file_edited": "main.py",
+    "blocking_issue": "JWT library conflict"
+  }
+}
+3. API Endpoints (FastAPI Spec)
+Please implement these endpoints in the Quack backend.
+
+A. The "Journal" Endpoint (Write)
+Path: POST /api/v1/agent/journal
+Purpose: Accepts logs, thoughts, and messages.
+Logic:
+Save to database (Postgres/Supabase).
+(Future) If type == MESSAGE, route to target agent.
+B. The "Rehydrate" Endpoint (Read)
+Path: GET /api/v1/agent/context/{session_id}
+Purpose: Returns the "Warm Start" prompt for a restarting agent.
+Logic:
+Fetch last N (e.g., 50) log entries.
+Crucial Step: If the logs are lengthy, trigger an LLM (Orchestrate/Voyai) to summarize the last session into a concise paragraph.
+Return Format:
+Plaintext
+SYSTEM INJECTION:
+You are resuming an active session.
+LAST KNOWN STATE: [Insert LLM Summary Here]
+RECENT LOGS:
+- [10:05] Thought: I need to refactor the login route.
+- [10:06] Action: Edited auth.py
+- [10:15] Error: RecursionDepthExceeded
+IMMEDIATE GOAL: Fix the recursion error in auth.py.
+4. The "Universal Script" (The Agent System Prompt)
+This is the text the user copies/pastes to initialize you (the agent). You need to write the logic that generates this script dynamically.
+
+Draft Template for the Script:
+
+Plaintext
+[SYSTEM INSTRUCTION - DO NOT IGNORE]
+You are connected to the Quack Session Manager.
+
+YOUR CORE PROTOCOLS:
+1.  **Heartbeat:** Every 5 messages or after a significant code change, you MUST emit a status update to Quack using the `log_status` tool.
+2.  **Context preservation:** If you hit a complex problem, log your reasoning *before* attempting the fix. This creates a save point.
+3.  **Messaging:** You have tools to message other agents. If you are working alone, you may ignore the `send_message` tool, but you MUST use the `log_status` tool.
+
+[DYNAMIC SECTION - INJECTED BY SERVER]
+**RESUMPTION CONTEXT:**
+{{SUMMARY_OF_PAST_SESSION}}
+*****************************************
+Please acknowledge you have received this context and explicitly state your next step based on the "Immediate Goal" above.
+5. Implementation Tasks for You (Claude)
+Define the Pydantic models for the AuditLog and ContextSnapshot.
+Write the FastAPI route for POST /journal that saves these logs.
+Write the Logic for GET /context that retrieves the logs. Mock the LLM summarization step for now (just return the raw text of the last 10 logs).
+Create the Python function that generates the "Universal Script" string, combining the static instructions with the dynamic context data.
+[END SPECIFICATION]
