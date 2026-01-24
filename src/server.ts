@@ -58,6 +58,7 @@ import {
   logAudit
 } from './db.js';
 import startQuackRouter from './startQuack.js';
+import { startGptProxy, stopGptProxy, getGptProxyStatus, processGptInbox } from './gpt-proxy.js';
 import {
   initContextRecoveryTables,
   saveJournalEntry,
@@ -1301,6 +1302,34 @@ app.get('/api/db/status', async (req, res) => {
     connected,
     status: connected ? 'healthy' : 'disconnected'
   });
+});
+
+// ============== GPT Proxy API ==============
+
+app.get('/api/gpt-proxy/status', (req, res) => {
+  const status = getGptProxyStatus();
+  res.json(status);
+});
+
+app.post('/api/gpt-proxy/start', (req, res) => {
+  const { pollIntervalMs, model, systemPrompt } = req.body || {};
+  startGptProxy({ pollIntervalMs, model, systemPrompt });
+  res.json({ success: true, message: 'GPT Proxy started', ...getGptProxyStatus() });
+});
+
+app.post('/api/gpt-proxy/stop', (req, res) => {
+  stopGptProxy();
+  res.json({ success: true, message: 'GPT Proxy stopped', ...getGptProxyStatus() });
+});
+
+app.post('/api/gpt-proxy/process', async (req, res) => {
+  try {
+    const result = await processGptInbox(req.body || {});
+    res.json({ success: true, ...result });
+  } catch (error: any) {
+    console.error('GPT Proxy process error:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // ============== Context Recovery API ==============

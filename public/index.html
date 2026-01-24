@@ -905,6 +905,7 @@
         <a href="/setup#replit-integration" class="setup-link">📖 Setup Guide</a>
         <button class="setup-link" onclick="launchMissionControl()" style="border: none; cursor: pointer;">🚀 Mission Control</button>
         <button class="setup-link" onclick="openRefreshQuackModal()" style="border: none; cursor: pointer; background: linear-gradient(135deg, #ff9800, #f57c00);">🦆 Refresh Quack</button>
+        <button id="gpt-proxy-btn" class="setup-link" onclick="toggleGptProxy()" style="border: none; cursor: pointer; background: #2a3a4a;">🤖 GPT Proxy: Off</button>
         <button class="setup-link" onclick="refreshDashboard()" style="border: none; cursor: pointer; background: #2a3a4a;">🔄 Refresh</button>
       </div>
     </header>
@@ -2278,7 +2279,7 @@ GET /api/v1/agent/context/agent/your-name to recover context</code>
         const signinRes = await fetch(`${API_BASE}/api/v1/agent/signin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agentId })
+          body: JSON.stringify({ agent_id: agentId })
         });
         const signinData = await signinRes.json();
 
@@ -2362,6 +2363,71 @@ curl -X POST "${API_BASE}/api/context/checkpoint" \\
         closeRefreshQuackModal();
       }
     });
+
+    // ============== GPT Proxy ==============
+    let gptProxyRunning = false;
+
+    async function checkGptProxyStatus() {
+      try {
+        const res = await fetch(`${API_BASE}/api/gpt-proxy/status`);
+        const data = await res.json();
+        gptProxyRunning = data.running;
+        updateGptProxyButton();
+      } catch (err) {
+        console.error('GPT Proxy status check failed:', err);
+      }
+    }
+
+    function updateGptProxyButton() {
+      const btn = document.getElementById('gpt-proxy-btn');
+      if (gptProxyRunning) {
+        btn.textContent = '🤖 GPT Proxy: On';
+        btn.style.background = 'linear-gradient(135deg, #4caf50, #2e7d32)';
+      } else {
+        btn.textContent = '🤖 GPT Proxy: Off';
+        btn.style.background = '#2a3a4a';
+      }
+    }
+
+    async function toggleGptProxy() {
+      const btn = document.getElementById('gpt-proxy-btn');
+      btn.disabled = true;
+      btn.textContent = '🤖 GPT Proxy: ...';
+      
+      try {
+        const endpoint = gptProxyRunning ? '/api/gpt-proxy/stop' : '/api/gpt-proxy/start';
+        const res = await fetch(`${API_BASE}${endpoint}`, { method: 'POST' });
+        const data = await res.json();
+        gptProxyRunning = data.running;
+        updateGptProxyButton();
+        
+        // Show toast notification
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.borderColor = gptProxyRunning ? '#4caf50' : '#ff9800';
+        toast.innerHTML = `
+          <div class="toast-header">
+            <span class="toast-title" style="color: ${gptProxyRunning ? '#4caf50' : '#ff9800'};">🤖 GPT Proxy ${gptProxyRunning ? 'Started' : 'Stopped'}</span>
+            <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
+          </div>
+          <div class="toast-body">
+            ${gptProxyRunning ? 'Monitoring gpt/main inbox. Messages will be auto-processed.' : 'GPT Proxy stopped. Messages will queue until restarted.'}
+          </div>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
+      } catch (err) {
+        console.error('GPT Proxy toggle failed:', err);
+        alert('Failed to toggle GPT Proxy');
+      } finally {
+        btn.disabled = false;
+        updateGptProxyButton();
+      }
+    }
+
+    // Check GPT Proxy status on load
+    checkGptProxyStatus();
 
     async function loadThreads() {
       try {

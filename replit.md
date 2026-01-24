@@ -17,6 +17,7 @@ The system uses **Express.js** with TypeScript (Node.js) and `tsx` for execution
 -   **Webhooks**: `webhooks.ts` provides a push notification system for incoming messages.
 -   **CoWork Orchestration**: `cowork-store.ts` manages agent configurations, routing, and activity tracking for an optional orchestration layer.
 -   **Context Recovery**: `context-recovery.ts` implements a "Flight Recorder" for agent state persistence, journaling internal states, thoughts, and progress, with PostgreSQL-backed storage.
+-   **GPT Proxy**: `gpt-proxy.ts` enables ChatGPT participation via Replit AI Integrations (OpenAI). Monitors `gpt/main` inbox and auto-responds to approved messages using GPT-4o.
 -   **Archive & Audit System**: PostgreSQL-backed permanent storage for completed message threads and an audit trail of system actions.
 -   **API Structure**: A comprehensive REST API supports sending messages, checking inboxes (with auto-approval options), marking messages, updating statuses, file uploads, and webhook registration.
 -   **Message Metadata**: Supports `project`, `priority`, `tags`, and `requireApproval` for message organization and workflow control.
@@ -31,6 +32,8 @@ A static HTML/CSS/JS dashboard in `public/` provides a real-time inbox monitorin
 -   **Hierarchical Inbox UI**: Organizes inboxes with collapsible parent/child structures.
 -   **Notifications**: Sound notifications (ElevenLabs generated) and browser notifications for new messages, with user settings.
 -   **Mission Control**: Button to open Quack and Claude.ai side-by-side for approval workflows.
+-   **Refresh Quack**: Button to generate start scripts for any agent ID, showing pending message count and context session status.
+-   **GPT Proxy Toggle**: Dashboard button to start/stop the GPT proxy that monitors `gpt/main` inbox.
 -   **Sessions Tab**: Agent sign-in flow to generate start scripts, view active context recovery sessions, and manage agent connections.
 -   **Audit Tab**: Interface to view and filter system events and database health.
 -   **Quick Start Section**: Inline documentation with Context Recovery instructions at the bottom of the dashboard.
