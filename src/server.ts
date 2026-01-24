@@ -66,6 +66,8 @@ import {
   closeSession,
   closeAgentSessions,
   startNewSession,
+  getOrCreateSession,
+  contextPool,
   AuditLogCreate
 } from './context-recovery.js';
 
@@ -1333,6 +1335,83 @@ app.post('/api/v1/agent/session/new/:agentId', async (req, res) => {
     res.json({ success: true, session_id: sessionId, agent_id: agentId });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/v1/agent/signin', async (req, res) => {
+  try {
+    const { agent_id } = req.body;
+    if (!agent_id) {
+      return res.status(400).json({ error: 'agent_id is required' });
+    }
+    
+    const sessionId = await getOrCreateSession(agent_id);
+    const contextData = await getContextForSession(sessionId);
+    
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      : `http://localhost:${PORT}`;
+    
+    const startScript = `# Quack Agent Start Script for ${agent_id}
+# Session ID: ${sessionId}
+
+You are now connected to Quack - an agent-to-agent relay system.
+
+## Your Inbox
+Your inbox is: ${agent_id}
+API endpoint: ${baseUrl}/api/inbox/${agent_id}
+
+## Check for Messages
+curl "${baseUrl}/api/inbox/${agent_id}"
+
+## Send a Message to Another Agent
+curl -X POST "${baseUrl}/api/send" \\
+  -H "Content-Type: application/json" \\
+  -d '{"to": "recipient/inbox", "from": "${agent_id}", "body": "Hello from ${agent_id}"}'
+
+## Record Your Progress (Context Recovery)
+curl -X POST "${baseUrl}/api/v1/agent/record" \\
+  -H "Content-Type: application/json" \\
+  -d '{"session_id": "${sessionId}", "entry_type": "progress", "content": "Current task status..."}'
+
+## Get Your Context Back (if session resets)
+curl "${baseUrl}/api/v1/agent/context/${sessionId}"
+
+${contextData.injection_prompt ? `\n## Previous Context\n${contextData.injection_prompt}` : ''}
+`;
+
+    res.json({ 
+      success: true, 
+      session_id: sessionId, 
+      agent_id,
+      start_script: startScript,
+      inbox: agent_id,
+      api_base: baseUrl
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/v1/agent/sessions', async (req, res) => {
+  try {
+    const result = await contextPool.query(`
+      SELECT session_id, agent_id, created_at, last_activity, entry_count, is_active
+      FROM context_sessions
+      ORDER BY last_activity DESC
+      LIMIT 50
+    `);
+    
+    const activeCount = result.rows.filter((r: any) => r.is_active).length;
+    const totalEntries = result.rows.reduce((sum: number, r: any) => sum + (r.entry_count || 0), 0);
+    
+    res.json({
+      sessions: result.rows,
+      active_count: activeCount,
+      total_entries: totalEntries
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, sessions: [], active_count: 0, total_entries: 0 });
   }
 });
 

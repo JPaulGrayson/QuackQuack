@@ -936,6 +936,7 @@
       <button class="btn btn-secondary" id="thread-view-btn" onclick="showThreadView()">💬 Threads</button>
       <button class="btn btn-secondary" id="cowork-view-btn" onclick="showCoWorkView()">🤖 Agents</button>
       <button class="btn btn-secondary" id="routing-view-btn" onclick="showRoutingView()">🔀 CoWork</button>
+      <button class="btn btn-secondary" id="sessions-view-btn" onclick="showSessionsView()">🧠 Sessions</button>
       <button class="btn btn-secondary" id="audit-view-btn" onclick="showAuditView()">📋 Audit</button>
     </div>
 
@@ -991,6 +992,47 @@
 
       <div class="routing-list" id="routing-list" style="display: flex; flex-direction: column; gap: 1rem;">
         <!-- CoWork routed messages will be rendered here -->
+      </div>
+    </div>
+
+    <div class="sessions-view" id="sessions" style="display: none;">
+      <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div class="stat" style="background: rgba(156, 39, 176, 0.1); border-color: rgba(156, 39, 176, 0.3);">
+          <div class="stat-value" id="sessions-active">-</div>
+          <div class="stat-label">Active Sessions</div>
+        </div>
+        <div class="stat" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3);">
+          <div class="stat-value" id="sessions-total-entries">-</div>
+          <div class="stat-label">Total Entries</div>
+        </div>
+        <div class="stat" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3);">
+          <div class="stat-value" id="monitoring-status">-</div>
+          <div class="stat-label">Monitoring</div>
+        </div>
+      </div>
+
+      <h3 style="color: #9c27b0; margin-bottom: 1rem;">🚀 Agent Sign In</h3>
+      <p style="color: #888; margin-bottom: 1rem; text-align: center;">When an agent wants to join your Quack sessions, enter their ID below to generate their start script.</p>
+      
+      <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; justify-content: center;">
+        <input type="text" id="agent-signin-id" placeholder="Agent ID (e.g., claude/my-project)" style="padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0; width: 280px;">
+        <button class="btn btn-primary" onclick="agentSignIn()" style="background: linear-gradient(135deg, #9c27b0, #673ab7);">
+          🔑 Generate Start Script
+        </button>
+        <button class="btn btn-secondary" onclick="loadSessions()">🔄 Refresh</button>
+      </div>
+
+      <div id="start-script-output" style="display: none; margin-bottom: 2rem; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 1.5rem; border: 1px solid rgba(156, 39, 176, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h4 style="color: #9c27b0; margin: 0;">📋 Start Script for <span id="script-agent-id"></span></h4>
+          <button class="btn btn-secondary" onclick="copyStartScript()" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">📋 Copy</button>
+        </div>
+        <pre id="start-script-content" style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; color: #4caf50; white-space: pre-wrap; word-break: break-word;"></pre>
+      </div>
+
+      <h3 style="color: #00d9ff; margin-bottom: 1rem;">🧠 Active Agent Sessions</h3>
+      <div id="context-sessions-list" style="display: flex; flex-direction: column; gap: 1rem;">
+        <!-- Context sessions will be rendered here -->
       </div>
     </div>
 
@@ -1424,6 +1466,7 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'none';
+      document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       setActiveTab('inbox-view-btn');
     }
@@ -1434,6 +1477,7 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('threads').style.display = 'grid';
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'none';
+      document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       setActiveTab('thread-view-btn');
       loadThreads();
@@ -1445,6 +1489,7 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'block';
       document.getElementById('routing').style.display = 'none';
+      document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       setActiveTab('cowork-view-btn');
       loadAgents();
@@ -1456,6 +1501,7 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'block';
+      document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       setActiveTab('routing-view-btn');
       loadRoutingMessages();
@@ -1600,6 +1646,137 @@ GET /api/inbox/your-name to check replies</code>
       }
     }
 
+    // ============== Sessions View ==============
+    let currentStartScript = '';
+    
+    function showSessionsView() {
+      currentView = 'sessions';
+      document.getElementById('inboxes').style.display = 'none';
+      document.getElementById('threads').style.display = 'none';
+      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('routing').style.display = 'none';
+      document.getElementById('audit').style.display = 'none';
+      document.getElementById('sessions').style.display = 'block';
+      setActiveTab('sessions-view-btn');
+      loadSessions();
+    }
+
+    async function loadSessions() {
+      try {
+        const contextRes = await fetch('/api/v1/agent/sessions');
+        const contextData = await contextRes.json();
+        
+        document.getElementById('sessions-active').textContent = contextData.active_count || 0;
+        document.getElementById('sessions-total-entries').textContent = contextData.total_entries || 0;
+        document.getElementById('monitoring-status').textContent = contextData.sessions?.length || 0;
+        
+        renderContextSessions(contextData.sessions || []);
+      } catch (e) {
+        console.error('Failed to load sessions:', e);
+      }
+    }
+
+    async function agentSignIn() {
+      const agentId = document.getElementById('agent-signin-id').value.trim();
+      if (!agentId) {
+        alert('Please enter an Agent ID (e.g., claude/my-project)');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/v1/agent/signin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent_id: agentId })
+        });
+        const data = await res.json();
+        
+        if (data.start_script) {
+          currentStartScript = data.start_script;
+          document.getElementById('script-agent-id').textContent = agentId;
+          document.getElementById('start-script-content').textContent = data.start_script;
+          document.getElementById('start-script-output').style.display = 'block';
+          loadSessions();
+        } else {
+          alert('Failed to generate start script: ' + (data.error || 'Unknown error'));
+        }
+      } catch (e) {
+        console.error('Failed to sign in agent:', e);
+        alert('Failed to sign in agent. Please try again.');
+      }
+    }
+
+    function copyStartScript() {
+      navigator.clipboard.writeText(currentStartScript).then(() => {
+        showToast('Start script copied to clipboard!', 'success');
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    }
+
+    function renderContextSessions(sessions) {
+      const container = document.getElementById('context-sessions-list');
+      if (sessions.length === 0) {
+        container.innerHTML = '<p style="color: #888; text-align: center;">No agent sessions yet. Sign in an agent above to get started.</p>';
+        return;
+      }
+      
+      container.innerHTML = sessions.map(s => `
+        <div class="message-card" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong style="color: #00d9ff;">🤖 ${escapeHtml(s.agent_id)}</strong>
+              <span style="margin-left: 1rem; color: ${s.is_active ? '#4caf50' : '#888'};">${s.is_active ? 'Active' : 'Closed'}</span>
+            </div>
+            <div style="text-align: right;">
+              <div style="color: #888; font-size: 0.85rem;">Entries: ${s.entry_count}</div>
+              <div style="color: #666; font-size: 0.75rem;">Last activity: ${new Date(s.last_activity).toLocaleString()}</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="viewSessionContext('${s.session_id}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">View Context</button>
+            <button class="btn btn-secondary" onclick="regenerateStartScript('${s.agent_id}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Get Start Script</button>
+            ${s.is_active ? `<button class="btn btn-secondary" onclick="closeContextSession('${s.session_id}')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; background: rgba(244, 67, 54, 0.3);">Close</button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function regenerateStartScript(agentId) {
+      document.getElementById('agent-signin-id').value = agentId;
+      await agentSignIn();
+    }
+
+    async function viewSessionContext(sessionId) {
+      try {
+        const res = await fetch(`/api/v1/agent/context/${sessionId}`);
+        const data = await res.json();
+        
+        currentStartScript = data.injection_prompt || '';
+        document.getElementById('script-agent-id').textContent = 'Session ' + sessionId.substring(0, 8);
+        document.getElementById('start-script-content').textContent = data.injection_prompt || 'No context available';
+        document.getElementById('start-script-output').style.display = 'block';
+      } catch (e) {
+        console.error('Failed to load context:', e);
+      }
+    }
+
+    async function closeContextSession(sessionId) {
+      if (!confirm('Close this session?')) return;
+      try {
+        await fetch(`/api/v1/agent/session/close/${sessionId}`, { method: 'POST' });
+        loadSessions();
+      } catch (e) {
+        console.error('Failed to close session:', e);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
     // ============== Audit View ==============
     let auditOffset = 0;
     const auditLimit = 50;
@@ -1611,6 +1788,7 @@ GET /api/inbox/your-name to check replies</code>
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'none';
+      document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'block';
       setActiveTab('audit-view-btn');
       loadAuditStats();

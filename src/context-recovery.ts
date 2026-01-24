@@ -50,9 +50,10 @@ export interface ContextResponse {
   injection_prompt: string;
 }
 
-const pool = new Pool({
+export const contextPool = new Pool({
   connectionString: process.env.DATABASE_URL
 });
+const pool = contextPool;
 
 export async function initContextRecoveryTables(): Promise<void> {
   try {
@@ -99,7 +100,7 @@ export async function initContextRecoveryTables(): Promise<void> {
   }
 }
 
-async function getOrCreateSession(agentId: string, sessionId?: string): Promise<string> {
+export async function getOrCreateSession(agentId: string, sessionId?: string): Promise<string> {
   // If explicit session_id provided, use it
   if (sessionId) {
     const existing = await pool.query(
