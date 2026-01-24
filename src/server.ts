@@ -7,6 +7,7 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
 import { 
   initStore, 
@@ -944,10 +945,119 @@ app.delete('/api/webhooks/:id', (req, res) => {
   res.json({ success: true });
 });
 
-// ============== Voyai Integration ==============
-// Note: Client calls voyai.org directly for session auth (cross-domain cookies)
-// This endpoint is for server-side registration only (lead gen)
+// ============== Voyai Integration (Server-to-Server Session Handshake) ==============
+// This implements the same pattern that works for Turai - no JWT in URL
 
+interface VoyaiSessionData {
+  voyaiUserId: string;
+  email: string;
+  tier: 'free' | 'premium';
+  features: {
+    universal_inbox: boolean;
+    notifications: boolean;
+    workflow_management: boolean;
+    file_attachments: boolean;
+    control_room: boolean;
+    multi_inbox: boolean;
+    auto_dispatch: boolean;
+    toast_notifications: boolean;
+  };
+}
+
+// In-memory session store for Voyai sessions (use Redis in production)
+const pendingVoyaiSessions = new Map<string, {
+  data: VoyaiSessionData;
+  createdAt: number;
+  expiresAt: number;
+}>();
+
+// Cleanup expired sessions every minute
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of pendingVoyaiSessions.entries()) {
+    if (now > session.expiresAt) {
+      pendingVoyaiSessions.delete(id);
+    }
+  }
+}, 60000);
+
+// Voyai calls this endpoint server-to-server to create a session
+// NOTE: Sign-in disabled until re-enabled - uncomment auth check when ready
+app.post('/api/voyai/session', (req, res) => {
+  // Verify the request is from Voyai using API key
+  const authHeader = req.headers.authorization;
+  const expectedKey = process.env.VOYAI_API_KEY;
+  
+  // TODO: Uncomment this auth check when ready to enable sign-in
+  // if (!authHeader || authHeader !== `Bearer ${expectedKey}`) {
+  //   return res.status(401).json({ error: 'Unauthorized' });
+  // }
+  
+  // For now, allow without auth for testing (remove this when enabling)
+  console.log('[Voyai Session] Auth check bypassed for testing');
+  
+  const sessionData: VoyaiSessionData = req.body;
+  
+  // Validate required fields
+  if (!sessionData.email || !sessionData.voyaiUserId) {
+    return res.status(400).json({ error: 'Missing required fields: email and voyaiUserId' });
+  }
+  
+  // Generate a short, random session ID
+  const sessionId = crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  
+  // Store the session
+  pendingVoyaiSessions.set(sessionId, {
+    data: sessionData,
+    createdAt: Date.now(),
+    expiresAt
+  });
+  
+  console.log(`[Voyai Session] Created session ${sessionId.substring(0, 8)}... for ${sessionData.email}`);
+  
+  // Return session ID to Voyai
+  res.json({
+    success: true,
+    data: {
+      sessionId,
+      expiresAt: new Date(expiresAt).toISOString()
+    }
+  });
+});
+
+// Quack frontend calls this to claim the session (one-time use)
+app.get('/api/voyai/claim-session', (req, res) => {
+  const sessionId = req.query.session as string;
+  
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID required' });
+  }
+  
+  const session = pendingVoyaiSessions.get(sessionId);
+  
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found or expired' });
+  }
+  
+  if (Date.now() > session.expiresAt) {
+    pendingVoyaiSessions.delete(sessionId);
+    return res.status(410).json({ error: 'Session expired' });
+  }
+  
+  // Delete the session (one-time use)
+  pendingVoyaiSessions.delete(sessionId);
+  
+  console.log(`[Voyai Session] Claimed session for ${session.data.email}`);
+  
+  // Return the user data
+  res.json({
+    success: true,
+    user: session.data
+  });
+});
+
+// Legacy registration endpoint (for lead gen)
 app.post('/api/voyai/register', async (req, res) => {
   try {
     const { email } = req.body;

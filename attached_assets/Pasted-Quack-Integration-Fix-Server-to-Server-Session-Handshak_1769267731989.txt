@@ -1,0 +1,220 @@
+Quack Integration Fix: Server-to-Server Session Handshake
+
+The Problem
+
+The current JWT-in-URL approach has browser redirect issues causing login loops. Users click "Log in with Voyai", authenticate successfully, but the redirect back to Quack fails due to:
+
+Long JWT tokens in URLs (800+ characters)
+Browser/SPA navigation issues with cross-domain redirects
+Client-side token extraction timing issues
+The Solution
+
+Implement the same server-to-server session handshake that works reliably for Turai.
+
+What Quack Needs to Implement
+
+1. Create Session Endpoint on Quack
+
+Quack needs to create an API endpoint that Voyai can call server-to-server:
+
+// quack-server/routes/voyai.ts
+import express from 'express';
+import crypto from 'crypto';
+const router = express.Router();
+// In-memory session store (use Redis in production)
+const pendingSessions = new Map<string, {
+  data: VoyaiSessionData;
+  createdAt: number;
+  expiresAt: number;
+}>();
+interface VoyaiSessionData {
+  voyaiUserId: string;
+  email: string;
+  tier: 'free' | 'premium';
+  features: {
+    universal_inbox: boolean;
+    notifications: boolean;
+    workflow_management: boolean;
+    file_attachments: boolean;
+    control_room: boolean;
+    multi_inbox: boolean;
+    auto_dispatch: boolean;
+    toast_notifications: boolean;
+  };
+}
+// Voyai calls this endpoint server-to-server
+router.post('/api/voyai/session', (req, res) => {
+  // Verify the request is from Voyai using API key
+  const authHeader = req.headers.authorization;
+  const expectedKey = process.env.VOYAI_API_KEY; // Set this in Quack's environment
+  
+  if (!authHeader || authHeader !== `Bearer ${expectedKey}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  const sessionData: VoyaiSessionData = req.body;
+  
+  // Validate required fields
+  if (!sessionData.email || !sessionData.voyaiUserId) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  // Generate a short, random session ID
+  const sessionId = crypto.randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  // Store the session
+  pendingSessions.set(sessionId, {
+    data: sessionData,
+    createdAt: Date.now(),
+    expiresAt
+  });
+  console.log(`[Voyai Session] Created session ${sessionId.substring(0, 8)}... for ${sessionData.email}`);
+  // Return session ID to Voyai
+  res.json({
+    success: true,
+    data: {
+      sessionId,
+      expiresAt: new Date(expiresAt).toISOString()
+    }
+  });
+});
+// Quack frontend calls this to claim the session
+router.get('/api/voyai/claim-session', (req, res) => {
+  const sessionId = req.query.session as string;
+  
+  if (!sessionId) {
+    return res.status(400).json({ error: 'Session ID required' });
+  }
+  const session = pendingSessions.get(sessionId);
+  
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found or expired' });
+  }
+  if (Date.now() > session.expiresAt) {
+    pendingSessions.delete(sessionId);
+    return res.status(410).json({ error: 'Session expired' });
+  }
+  // Delete the session (one-time use)
+  pendingSessions.delete(sessionId);
+  console.log(`[Voyai Session] Claimed session for ${session.data.email}`);
+  // Return the user data
+  res.json({
+    success: true,
+    user: session.data
+  });
+});
+// Cleanup expired sessions periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of pendingSessions.entries()) {
+    if (now > session.expiresAt) {
+      pendingSessions.delete(id);
+    }
+  }
+}, 60000); // Every minute
+export default router;
+2. Update Quack Frontend
+
+When user arrives at quack.us.com/?session=abc123:
+
+// quack-client/hooks/useVoyaiAuth.ts
+import { useEffect, useState } from 'react';
+interface VoyaiUser {
+  voyaiUserId: string;
+  email: string;
+  tier: 'free' | 'premium';
+  features: {
+    universal_inbox: boolean;
+    notifications: boolean;
+    workflow_management: boolean;
+    file_attachments: boolean;
+    control_room: boolean;
+    multi_inbox: boolean;
+    auto_dispatch: boolean;
+    toast_notifications: boolean;
+  };
+}
+export function useVoyaiAuth() {
+  const [user, setUser] = useState<VoyaiUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    async function checkAuth() {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session');
+      if (sessionId) {
+        try {
+          // Claim the session from Voyai
+          const response = await fetch(`/api/voyai/claim-session?session=${sessionId}`);
+          const data = await response.json();
+          if (data.success && data.user) {
+            // Store user in localStorage or your auth system
+            localStorage.setItem('voyai_user', JSON.stringify(data.user));
+            setUser(data.user);
+            
+            // Clean URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('session');
+            window.history.replaceState({}, '', url.toString());
+          } else {
+            setError(data.error || 'Failed to claim session');
+          }
+        } catch (err) {
+          console.error('Voyai auth error:', err);
+          setError('Authentication failed');
+        }
+      } else {
+        // Check localStorage for existing session
+        const stored = localStorage.getItem('voyai_user');
+        if (stored) {
+          setUser(JSON.parse(stored));
+        }
+      }
+      setLoading(false);
+    }
+    checkAuth();
+  }, []);
+  const loginWithVoyai = () => {
+    // Redirect to Voyai login
+    const returnUrl = encodeURIComponent(window.location.origin);
+    window.location.href = `https://voyai.org/login?return_to=${returnUrl}&app=quack`;
+  };
+  const logout = () => {
+    localStorage.removeItem('voyai_user');
+    setUser(null);
+  };
+  return { user, loading, error, loginWithVoyai, logout };
+}
+3. Environment Variables for Quack
+
+# Add to Quack's environment
+VOYAI_API_KEY=<generate-a-secure-random-key>
+Share this key with Voyai team to add to Voyai's secrets as QUACK_API_KEY.
+
+What Voyai Will Implement
+
+Once Quack has the /api/voyai/session endpoint ready, Voyai will:
+
+Create a launchQuack() function similar to launchTurai()
+Call Quack's session endpoint server-to-server
+Redirect user to quack.us.com/?session=<session_id>
+The Voyai-side code is already written and waiting for Quack's endpoint.
+
+Testing
+
+Quack implements the session endpoint
+Share the VOYAI_API_KEY with Voyai team
+Voyai adds QUACK_API_KEY to secrets and enables the integration
+Test the flow:
+User visits quack.us.com
+Clicks "Log in with Voyai"
+Redirects to voyai.org/login?return_to=quack.us.com
+User logs in
+Voyai calls quack.us.com/api/voyai/session server-to-server
+User redirects to quack.us.com/?session=abc123
+Quack claims session and user is logged in
+Why This Works
+
+Aspect	Old Approach (Broken)	New Approach (Reliable)
+Token in URL	800+ char JWT	64 char session ID
+Validation	Client-side extraction	Server-to-server
+Security	Token exposed in browser history	Session ID is one-time use
+Reliability	Browser redirect issues	Simple server communication
