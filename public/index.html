@@ -904,6 +904,7 @@
       <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
         <a href="/setup#replit-integration" class="setup-link">📖 Setup Guide</a>
         <button class="setup-link" onclick="launchMissionControl()" style="border: none; cursor: pointer;">🚀 Mission Control</button>
+        <button class="setup-link" onclick="openRefreshQuackModal()" style="border: none; cursor: pointer; background: linear-gradient(135deg, #ff9800, #f57c00);">🦆 Refresh Quack</button>
         <button class="setup-link" onclick="refreshDashboard()" style="border: none; cursor: pointer; background: #2a3a4a;">🔄 Refresh</button>
       </div>
     </header>
@@ -1270,6 +1271,25 @@ GET /api/v1/agent/context/agent/your-name to recover context</code>
           <button class="btn btn-secondary" onclick="closeCoWorkModal()">Cancel</button>
           <button class="btn btn-primary" onclick="sendViaCoWork()" style="background: linear-gradient(135deg, #00d9ff, #0066ff);">Send via CoWork</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Refresh Quack Modal -->
+  <div id="refresh-quack-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="background: #1a2a3a; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid #3a4a5a;">
+      <div style="padding: 1.5rem; border-bottom: 1px solid #3a4a5a; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0; color: #ff9800;">🦆 Refresh Quack</h2>
+        <button onclick="closeRefreshQuackModal()" style="background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+      <div id="refresh-quack-content" style="padding: 1.5rem;">
+        <p style="color: #aaa; margin-bottom: 1rem;">Enter an agent ID to generate a start script that will revive them with their pending messages and context.</p>
+        <div style="margin-bottom: 1rem;">
+          <label style="color: #ccc; display: block; margin-bottom: 0.5rem;">Agent ID</label>
+          <input type="text" id="refresh-agent-id" placeholder="e.g., claude/coordinator or replit/quack" style="width: 100%; padding: 0.75rem; background: #0d1a2a; border: 1px solid #3a4a5a; border-radius: 6px; color: #fff; font-size: 1rem;">
+        </div>
+        <button onclick="generateRefreshScript()" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #ff9800, #f57c00); border: none; border-radius: 6px; color: #fff; font-weight: bold; cursor: pointer; font-size: 1rem;">Generate Start Script</button>
+        <div id="refresh-result" style="margin-top: 1.5rem; display: none;"></div>
       </div>
     </div>
   </div>
@@ -2229,6 +2249,119 @@ GET /api/v1/agent/context/agent/your-name to recover context</code>
         if (toast.parentNode) toast.remove();
       }, 8000);
     }
+
+    // ============== Refresh Quack ==============
+    function openRefreshQuackModal() {
+      document.getElementById('refresh-quack-modal').style.display = 'flex';
+      document.getElementById('refresh-agent-id').value = '';
+      document.getElementById('refresh-result').style.display = 'none';
+      document.getElementById('refresh-agent-id').focus();
+    }
+
+    function closeRefreshQuackModal() {
+      document.getElementById('refresh-quack-modal').style.display = 'none';
+    }
+
+    async function generateRefreshScript() {
+      const agentId = document.getElementById('refresh-agent-id').value.trim();
+      if (!agentId) {
+        alert('Please enter an agent ID');
+        return;
+      }
+
+      const resultDiv = document.getElementById('refresh-result');
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<p style="color: #888;">Generating script...</p>';
+
+      try {
+        // Call the agent sign-in endpoint
+        const signinRes = await fetch(`${API_BASE}/api/v1/agent/signin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agentId })
+        });
+        const signinData = await signinRes.json();
+
+        // Get pending message count
+        const inboxRes = await fetch(`${API_BASE}/api/inbox/${encodeURIComponent(agentId)}`);
+        const inboxData = await inboxRes.json();
+        const pendingCount = inboxData.messages ? inboxData.messages.filter(m => m.status === 'pending' || m.status === 'approved').length : 0;
+
+        // Get context session if exists
+        let sessionInfo = '';
+        try {
+          const sessionsRes = await fetch(`${API_BASE}/api/v1/agent/sessions`);
+          const sessions = await sessionsRes.json();
+          const agentSession = sessions.find(s => s.agent_id === agentId && s.status === 'active');
+          if (agentSession) {
+            sessionInfo = `\n\n// Active session found: ${agentSession.session_id}\n// Last checkpoint: ${agentSession.last_checkpoint_at || 'none'}`;
+          }
+        } catch (e) {}
+
+        const script = `// 🦆 Quack Start Script for ${agentId}
+// Generated: ${new Date().toISOString()}
+// Pending messages: ${pendingCount}${sessionInfo}
+
+// Step 1: Check your inbox
+curl "${API_BASE}/api/inbox/${encodeURIComponent(agentId)}"
+
+// Step 2: Start Context Recovery session
+curl -X POST "${API_BASE}/api/context/session" \\
+  -H "Content-Type: application/json" \\
+  -d '{"agentId": "${agentId}", "goal": "Resume work from Quack refresh"}'
+
+// Step 3: Process approved messages
+// Check for messages with status "approved" and work on them
+
+// Step 4: Save checkpoints as you work
+curl -X POST "${API_BASE}/api/context/checkpoint" \\
+  -H "Content-Type: application/json" \\
+  -d '{"sessionId": "YOUR_SESSION_ID", "checkpoint": {"progress": "Working on task...", "state": {}}}'`;
+
+        resultDiv.innerHTML = `
+          <div style="background: #0d1a2a; border: 1px solid #3a4a5a; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span style="color: #ff9800; font-weight: bold;">📋 Start Script for ${agentId}</span>
+              <button onclick="copyRefreshScript()" style="background: #ff9800; color: #000; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Copy</button>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <span style="color: #4caf50;">✓ ${pendingCount} pending message${pendingCount !== 1 ? 's' : ''}</span>
+              ${sessionInfo ? '<span style="color: #00d9ff;">✓ Active session found</span>' : '<span style="color: #888;">○ No active session</span>'}
+            </div>
+            <pre id="refresh-script-content" style="background: #0a1520; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; color: #aaa; white-space: pre-wrap; margin: 0;">${escapeHtml(script)}</pre>
+          </div>
+          <p style="color: #888; font-size: 0.9rem;">Paste this script to the agent to bring them back online with their context.</p>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color: #ff5252;">Error: ${err.message}</p>`;
+      }
+    }
+
+    function copyRefreshScript() {
+      const content = document.getElementById('refresh-script-content').textContent;
+      navigator.clipboard.writeText(content).then(() => {
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#4caf50';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.style.background = '#ff9800';
+        }, 2000);
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeRefreshQuackModal();
+      }
+    });
 
     async function loadThreads() {
       try {
