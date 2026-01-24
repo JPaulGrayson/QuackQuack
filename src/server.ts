@@ -57,6 +57,14 @@ import {
   logAudit
 } from './db.js';
 import startQuackRouter from './startQuack.js';
+import {
+  initContextRecoveryTables,
+  saveJournalEntry,
+  getContextForSession,
+  getContextForAgent,
+  generateUniversalScript,
+  AuditLogCreate
+} from './context-recovery.js';
 
 // ElevenLabs client for generating duck sounds
 const elevenlabs = process.env.ELEVENLABS_API_KEY 
@@ -87,6 +95,7 @@ initStore();
 initFileStore();
 initWebhooks();
 initCoWorkStore();
+initContextRecoveryTables();
 
 // Create QuackStore adapter for Dispatcher
 const storeAdapter: QuackStore = {
@@ -1177,6 +1186,121 @@ app.get('/api/db/status', async (req, res) => {
     connected,
     status: connected ? 'healthy' : 'disconnected'
   });
+});
+
+// ============== Context Recovery API ==============
+
+app.post('/api/v1/agent/journal', async (req, res) => {
+  try {
+    const entry: AuditLogCreate = req.body;
+    
+    if (!entry.agent_id || !entry.type || !entry.content) {
+      return res.status(400).json({ error: 'Missing required fields: agent_id, type, content' });
+    }
+    
+    const logEntry = await saveJournalEntry(entry);
+    res.json(logEntry);
+  } catch (error: any) {
+    console.error('Journal entry error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/v1/agent/context/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    
+    const context = await getContextForSession(sessionId, limit);
+    res.json(context);
+  } catch (error: any) {
+    if (error.message === 'Session not found') {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+    console.error('Context fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/v1/agent/context/agent/:agentId', async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    
+    const context = await getContextForAgent(agentId, limit);
+    res.json(context);
+  } catch (error: any) {
+    if (error.message === 'No sessions found for agent') {
+      return res.status(404).json({ error: 'No sessions found for agent' });
+    }
+    console.error('Agent context fetch error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/v1/agent/script/:agentId', async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const includeContext = req.query.include_context !== 'false';
+    
+    let context = null;
+    if (includeContext) {
+      try {
+        context = await getContextForAgent(agentId, 20);
+      } catch (e) {
+        // No prior context, that's fine
+      }
+    }
+    
+    const script = generateUniversalScript(agentId, context || undefined);
+    res.json({ 
+      agent_id: agentId, 
+      script, 
+      has_context: context !== null 
+    });
+  } catch (error: any) {
+    console.error('Script generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/v1/agent/thought', async (req, res) => {
+  try {
+    const { agent_id, content, session_id } = req.body;
+    if (!agent_id || !content) {
+      return res.status(400).json({ error: 'Missing required fields: agent_id, content' });
+    }
+    const logEntry = await saveJournalEntry({ agent_id, type: 'THOUGHT', content, session_id });
+    res.json(logEntry);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/v1/agent/error', async (req, res) => {
+  try {
+    const { agent_id, content, session_id } = req.body;
+    if (!agent_id || !content) {
+      return res.status(400).json({ error: 'Missing required fields: agent_id, content' });
+    }
+    const logEntry = await saveJournalEntry({ agent_id, type: 'ERROR', content, session_id });
+    res.json(logEntry);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/v1/agent/checkpoint', async (req, res) => {
+  try {
+    const { agent_id, content, session_id, context_snapshot } = req.body;
+    if (!agent_id || !content) {
+      return res.status(400).json({ error: 'Missing required fields: agent_id, content' });
+    }
+    const logEntry = await saveJournalEntry({ agent_id, type: 'CHECKPOINT', content, session_id, context_snapshot });
+    res.json(logEntry);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // ============== UI Routes ==============
