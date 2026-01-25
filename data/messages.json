@@ -156,6 +156,42 @@
         "notify-agent"
       ],
       "routing": "direct"
+    },
+    {
+      "id": "aa434cfb-2ea4-4492-960d-ca650f36882f",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T20:57:45.393Z",
+      "expiresAt": "2026-01-27T20:57:45.393Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"8d1b0f20-01a6-43bf-a5e8-f92ffd08493b\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:8d1b0f20\",\"messageSummary\":\"TEST: No duplicate tab should open now\"}",
+      "files": [],
+      "threadId": "aa434cfb-2ea4-4492-960d-ca650f36882f",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
+    },
+    {
+      "id": "812e837f-562a-4844-9bbc-df89abcf2f1d",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T20:59:24.165Z",
+      "expiresAt": "2026-01-27T20:59:24.165Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"6b4388ba-edff-4c42-813f-5920d0cb62f3\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:6b4388ba\",\"messageSummary\":\"DEBUG: Testing no-duplicate with logging\"}",
+      "files": [],
+      "threadId": "812e837f-562a-4844-9bbc-df89abcf2f1d",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
     }
   ],
   "replit/quack": [
@@ -225,10 +261,22 @@
       "from": "claude/no-dup-test",
       "timestamp": "2026-01-25T20:57:10.316Z",
       "expiresAt": "2026-01-27T20:57:10.316Z",
-      "status": "pending",
+      "status": "in_progress",
       "task": "TEST: No duplicate tab should open now",
       "files": [],
       "threadId": "8d1b0f20-01a6-43bf-a5e8-f92ffd08493b",
+      "routing": "direct"
+    },
+    {
+      "id": "6b4388ba-edff-4c42-813f-5920d0cb62f3",
+      "to": "replit/quack",
+      "from": "claude/debug-test",
+      "timestamp": "2026-01-25T20:59:11.592Z",
+      "expiresAt": "2026-01-27T20:59:11.592Z",
+      "status": "in_progress",
+      "task": "DEBUG: Testing no-duplicate with logging",
+      "files": [],
+      "threadId": "6b4388ba-edff-4c42-813f-5920d0cb62f3",
       "routing": "direct"
     }
   ]

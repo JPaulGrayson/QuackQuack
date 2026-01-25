@@ -2745,14 +2745,23 @@ pollQuackInbox();`;
     // Auto-open agent platform tab and copy quack prompt to clipboard
     async function autoOpenAgentPlatform(platformUrl) {
       // Check if we're already on this platform (avoid duplicate tabs)
-      const currentHost = window.location.hostname;
+      const currentHost = window.location.hostname.toLowerCase();
+      console.log('🦆 autoOpenAgentPlatform called with:', platformUrl);
+      console.log('🦆 Current hostname:', currentHost);
+      
       try {
         const targetUrl = new URL(platformUrl);
-        const targetHost = targetUrl.hostname;
+        const targetHost = targetUrl.hostname.toLowerCase();
+        console.log('🦆 Target hostname:', targetHost);
         
-        // If target is same site or both are Quack/Replit, skip opening
-        if (currentHost === targetHost || 
-            (currentHost.includes('replit') && targetHost.includes('replit')) ||
+        // If target is same site or both are Quack/Replit-related, skip opening
+        const isCurrentReplit = currentHost.includes('replit') || currentHost.includes('janeway');
+        const isTargetReplit = targetHost.includes('replit');
+        const bothReplit = isCurrentReplit && isTargetReplit;
+        
+        console.log('🦆 isCurrentReplit:', isCurrentReplit, 'isTargetReplit:', isTargetReplit, 'bothReplit:', bothReplit);
+        
+        if (currentHost === targetHost || bothReplit ||
             (currentHost.includes('quack') && targetHost.includes('quack'))) {
           console.log('🦆 Already on target platform, skipping duplicate tab');
           return; // Don't open - we're already here
