@@ -3508,7 +3508,10 @@ pollQuackInbox();`;
     // For dev/localhost: show toasts immediately (no Voyai auth needed)
     // For production: toasts are shown after Voyai auth completes
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
+    const isReplitDev = window.location.hostname.includes('.replit.dev');
+    const hasDevParam = new URLSearchParams(window.location.search).get('dev') === '1';
+    const isDevMode = isLocalhost || isReplitDev || hasDevParam;
+    if (isDevMode) {
       console.log('🦆 Dev mode: showing pending toasts immediately');
       showPendingToastsOnLoad();
     }
@@ -3559,9 +3562,8 @@ pollQuackInbox();`;
         console.error('Voyai auth check failed:', e);
         localStorage.removeItem('voyai_token');
         
-        // Skip redirect on localhost for dev testing
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        if (isLocalhost) {
+        // Skip redirect on dev environments for testing
+        if (isDevMode) {
           console.log('🦆 Dev mode: skipping Voyai redirect for testing');
           return null;
         }
