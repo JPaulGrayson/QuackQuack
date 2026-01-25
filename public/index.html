@@ -3347,12 +3347,7 @@ pollQuackInbox();`;
       
       container.appendChild(toast);
       
-      // Auto-dismiss after 15 seconds
-      setTimeout(() => {
-        if (toast.parentElement) {
-          toast.remove();
-        }
-      }, 15000);
+      // No auto-dismiss - user must click to close or take action
     }
 
     function closeToast(toast) {
