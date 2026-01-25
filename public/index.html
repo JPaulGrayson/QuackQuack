@@ -2721,7 +2721,7 @@ pollQuackInbox();`;
         } else if (data.automation === 'manual') {
           // Fallback: Show manual notification options
           if (data.notifyPrompt) {
-            showNotifyPromptToast(data.notifyPrompt, 'target agent', data.platformUrl);
+            showNotifyPromptToast(data.notifyPrompt, 'target agent', data.platformUrl, data.message?.id);
           } else if (data.platformUrl) {
             showApprovalToast('target agent', data.platformUrl);
           }
@@ -2791,17 +2791,21 @@ pollQuackInbox();`;
     let currentNotifyPrompt = '';
     
     // Show toast with notify prompt and copy button (no auto-open window)
-    function showNotifyPromptToast(prompt, agentName, platformUrl) {
+    function showNotifyPromptToast(prompt, agentName, platformUrl, messageId) {
       const container = document.getElementById('toast-container');
       
-      // Store raw prompt for copy
-      currentNotifyPrompt = prompt;
+      // Create helpful clipboard message with message ID
+      const shortId = messageId ? messageId.substring(0, 8) : '';
+      const clipboardMessage = shortId 
+        ? `Check your Quack inbox for message ${shortId}`
+        : prompt;
+      
+      // Store for copy button
+      currentNotifyPrompt = clipboardMessage;
       
       // Auto-copy to clipboard immediately
-      let clipboardSuccess = false;
-      navigator.clipboard.writeText(prompt).then(() => {
-        clipboardSuccess = true;
-        console.log('🦆 Prompt auto-copied to clipboard:', prompt);
+      navigator.clipboard.writeText(clipboardMessage).then(() => {
+        console.log('🦆 Prompt auto-copied to clipboard:', clipboardMessage);
       }).catch(err => {
         console.log('🦆 Auto-copy failed (user can click Copy button):', err.message);
       });
@@ -2824,11 +2828,19 @@ pollQuackInbox();`;
       const body = document.createElement('div');
       body.className = 'toast-body';
       body.style.cssText = 'font-family: monospace; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;';
-      body.textContent = prompt; // Use textContent to safely display without escaping issues
+      body.textContent = clipboardMessage;
+      
+      // Tip section for Refresh Quack and Context Recovery
+      const tipSection = document.createElement('div');
+      tipSection.style.cssText = 'color: #888; font-size: 0.8em; margin-top: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;';
+      tipSection.innerHTML = `
+        <strong>💡 Tips:</strong> Use <span style="color: #f9a825;">Refresh Quack</span> to get your agent's start script, 
+        or check <span style="color: #00d9ff;">Sessions</span> for Context Recovery options.
+      `;
       
       const actions = document.createElement('div');
       actions.className = 'toast-actions';
-      actions.style.cssText = 'display: flex; gap: 0.5rem;';
+      actions.style.cssText = 'display: flex; gap: 0.5rem; margin-top: 0.5rem;';
       
       const copyBtn = document.createElement('button');
       copyBtn.className = 'btn btn-primary';
@@ -2850,6 +2862,7 @@ pollQuackInbox();`;
       toast.appendChild(header);
       toast.appendChild(statusMsg);
       toast.appendChild(body);
+      toast.appendChild(tipSection);
       toast.appendChild(actions);
       container.appendChild(toast);
       
@@ -3458,7 +3471,7 @@ pollQuackInbox();`;
           console.log('🦆 FLOW: Automation requested - showing notify toast & opening platform');
           console.log('🦆 platformUrl:', data.platformUrl);
           console.log('🦆 notifyPrompt:', data.notifyPrompt);
-          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl);
+          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl, data.message?.id);
           autoOpenAgentPlatform(data.platformUrl);
         } else if (data.automation === 'requested') {
           console.log('🦆 FLOW: Automation requested (no platformUrl) - showing info toast');
@@ -3467,11 +3480,11 @@ pollQuackInbox();`;
           console.log('🦆 FLOW: Ping with platformUrl - showing notify toast & opening platform');
           console.log('🦆 platformUrl:', data.platformUrl);
           console.log('🦆 notifyPrompt:', data.notifyPrompt);
-          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl);
+          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl, data.message?.id);
           autoOpenAgentPlatform(data.platformUrl);
         } else if (data.automation === 'manual' && data.platformUrl) {
           console.log('🦆 FLOW: Manual with platformUrl - showing notify toast & opening platform');
-          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl);
+          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl, data.message?.id);
           autoOpenAgentPlatform(data.platformUrl);
         }
         
