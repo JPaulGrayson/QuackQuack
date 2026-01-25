@@ -210,6 +210,24 @@
         "notify-agent"
       ],
       "routing": "direct"
+    },
+    {
+      "id": "7d565231-b8b4-40d4-9b80-fda44ce3a383",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T21:20:36.721Z",
+      "expiresAt": "2026-01-27T21:20:36.721Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"9cf9f15f-dfc5-43b4-a538-af8b442f6f2d\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:9cf9f15f\",\"messageSummary\":\"Testing the new approval toast with helpful tips!\"}",
+      "files": [],
+      "threadId": "7d565231-b8b4-40d4-9b80-fda44ce3a383",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
     }
   ],
   "replit/quack": [
@@ -315,7 +333,7 @@
       "from": "claude/test",
       "timestamp": "2026-01-25T21:20:14.524Z",
       "expiresAt": "2026-01-27T21:20:14.524Z",
-      "status": "pending",
+      "status": "in_progress",
       "task": "Testing the new approval toast with helpful tips!",
       "files": [],
       "threadId": "9cf9f15f-dfc5-43b4-a538-af8b442f6f2d",
@@ -331,6 +349,18 @@
       "task": "Testing the new approval toast with helpful tips!",
       "files": [],
       "threadId": "7e49d6d2-de5b-43a1-9646-fb682b8c1048",
+      "routing": "direct"
+    },
+    {
+      "id": "efd1840b-8157-4151-8915-5baba9b43fb7",
+      "to": "replit/quack",
+      "from": "claude/test",
+      "timestamp": "2026-01-25T21:21:33.855Z",
+      "expiresAt": "2026-01-27T21:21:33.855Z",
+      "status": "pending",
+      "task": "Testing improved tip visibility",
+      "files": [],
+      "threadId": "efd1840b-8157-4151-8915-5baba9b43fb7",
       "routing": "direct"
     }
   ]
