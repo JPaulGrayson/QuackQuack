@@ -62,6 +62,7 @@
     .hero-image {
       text-align: center;
       margin: 1.5rem 0;
+      position: relative;
     }
 
     .hero-image img {
@@ -69,6 +70,63 @@
       max-height: 300px;
       border-radius: 16px;
       box-shadow: 0 8px 32px rgba(255, 193, 7, 0.2);
+    }
+
+    /* Clickable duck overlay */
+    .duck-click-zone {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 10;
+    }
+
+    .duck-click-zone:hover {
+      box-shadow: 0 0 30px rgba(255, 193, 7, 0.6);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .duck-click-zone:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    .quack-feedback {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.5s;
+    }
+
+    .quack-feedback.show {
+      opacity: 1;
+      transform: translate(-50%, -80%);
+      animation: quackBubble 0.8s ease-out forwards;
+    }
+
+    @keyframes quackBubble {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -100%) scale(1.3);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -150%) scale(0.8);
+      }
     }
 
     /* Tab navigation */
@@ -297,9 +355,12 @@
       <p class="tagline">Connect any AI agent in minutes</p>
     </header>
 
-    <!-- Hero Architecture Image -->
-    <div class="hero-image">
+    <!-- Hero Architecture Image - Click the duck to quack! -->
+    <div class="hero-image" id="hero-container">
       <img src="/images/agent-network.png" alt="Quack Agent Network - Connect Claude, Replit, GPT, Gemini, Cursor">
+      <div class="duck-click-zone" onclick="playQuack()" title="Click me to quack!" role="button"
+        aria-label="Play quack sound"></div>
+      <div class="quack-feedback" id="quack-feedback">🦆 Quack!</div>
     </div>
 
     <!-- Tab Navigation -->
@@ -668,9 +729,60 @@ When I say "send quack to X": Call sendQuack(X, message)</code>
         }, 2000);
       });
     }
+
+    // Quack sound functionality
+    let quackSounds = [];
+    let soundsLoaded = false;
+    let lastQuackTime = 0;
+
+    // Preload quack sounds
+    function preloadSounds() {
+      const soundTypes = ['receive', 'send'];
+      soundTypes.forEach(type => {
+        const audio = new Audio(`/sounds/${type}.mp3`);
+        audio.preload = 'auto';
+        quackSounds.push(audio);
+      });
+      soundsLoaded = true;
+    }
+
+    // Play a random quack sound
+    function playQuack() {
+      const now = Date.now();
+      // Prevent rapid quacking (500ms cooldown)
+      if (now - lastQuackTime < 500) return;
+      lastQuackTime = now;
+
+      // Load sounds on first click (browser audio policy)
+      if (!soundsLoaded) {
+        preloadSounds();
+      }
+
+      // Play random quack
+      if (quackSounds.length > 0) {
+        const randomSound = quackSounds[Math.floor(Math.random() * quackSounds.length)];
+        randomSound.currentTime = 0;
+        randomSound.play().catch(() => {
+          console.log('Audio autoplay blocked - click to enable');
+        });
+      }
+
+      // Show visual feedback
+      const feedback = document.getElementById('quack-feedback');
+      feedback.classList.remove('show');
+      // Force reflow to restart animation
+      void feedback.offsetWidth;
+      feedback.classList.add('show');
+
+      // Remove class after animation
+      setTimeout(() => {
+        feedback.classList.remove('show');
+      }, 800);
+    }
+
+    // Preload sounds on page load
+    document.addEventListener('DOMContentLoaded', preloadSounds);
   </script>
 </body>
 
 </html>
-</code>
-<parameter name="Complexity">7
