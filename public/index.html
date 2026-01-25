@@ -3372,14 +3372,22 @@ pollQuackInbox();`;
       try {
         const res = await fetch(`${API_BASE}/api/approve/${messageId}`, { method: 'POST' });
         const data = await res.json();
+        console.log('🦆 APPROVAL RESPONSE:', JSON.stringify(data));
         toast.remove();
         
-        // Show automation status
+        // Show automation status based on type
         if (data.automation === 'requested') {
+          console.log('🦆 FLOW: Automation requested - showing automation toast');
           showAutomationToast('Claude is handling the notification automatically!');
-        } else if (data.automation === 'manual' && data.platformUrl) {
+        } else if (data.automation === 'ping' && data.platformUrl) {
+          console.log('🦆 FLOW: Ping with platformUrl - showing notify toast & opening platform');
+          console.log('🦆 platformUrl:', data.platformUrl);
+          console.log('🦆 notifyPrompt:', data.notifyPrompt);
           showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl);
-          // Auto-open agent's platform tab and copy prompt
+          autoOpenAgentPlatform(data.platformUrl);
+        } else if (data.automation === 'manual' && data.platformUrl) {
+          console.log('🦆 FLOW: Manual with platformUrl - showing notify toast & opening platform');
+          showNotifyPromptToast(data.notifyPrompt || data.prompt, 'target agent', data.platformUrl);
           autoOpenAgentPlatform(data.platformUrl);
         }
         

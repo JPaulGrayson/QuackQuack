@@ -21,11 +21,82 @@
       "from": "test/user",
       "timestamp": "2026-01-25T18:24:06.642Z",
       "expiresAt": "2026-01-27T18:24:06.642Z",
-      "status": "pending",
+      "status": "approved",
       "task": "Test pending message for toast",
       "files": [],
       "threadId": "da78b511-d8a6-4027-bc47-f60610e20d91",
       "project": "inbox",
+      "routing": "direct"
+    },
+    {
+      "id": "acefd23e-cba4-4929-9eaf-6b18ecff39e7",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T18:33:48.171Z",
+      "expiresAt": "2026-01-27T18:33:48.171Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"1b1b84c2-eea1-4f27-a2e3-478328d2e527\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:1b1b84c2\",\"messageSummary\":\"Testing the full approval workflow with copy and platform open\"}",
+      "files": [],
+      "threadId": "acefd23e-cba4-4929-9eaf-6b18ecff39e7",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
+    },
+    {
+      "id": "f627793f-5cc1-4b3d-b68e-8aff9782bb47",
+      "to": "claude",
+      "from": "replit/quack",
+      "timestamp": "2026-01-25T18:34:09.381Z",
+      "expiresAt": "2026-01-27T18:34:09.381Z",
+      "status": "approved",
+      "task": "Please review the toast notification system - testing platform open and copy",
+      "files": [],
+      "threadId": "f627793f-5cc1-4b3d-b68e-8aff9782bb47",
+      "project": "inbox",
+      "routing": "direct"
+    },
+    {
+      "id": "74519c3c-94f4-4c22-85ac-14c6f13bc616",
+      "to": "claude",
+      "from": "replit/quack",
+      "timestamp": "2026-01-25T18:35:32.283Z",
+      "expiresAt": "2026-01-27T18:35:32.283Z",
+      "status": "approved",
+      "task": "FINAL TEST: Verify approval flow with platform open and copy",
+      "files": [],
+      "threadId": "74519c3c-94f4-4c22-85ac-14c6f13bc616",
+      "project": "inbox",
+      "routing": "direct"
+    },
+    {
+      "id": "388b8fa3-eee7-4d3d-8c72-7d718e3a1dba",
+      "to": "claude",
+      "from": "replit/quack",
+      "timestamp": "2026-01-25T18:37:39.303Z",
+      "expiresAt": "2026-01-27T18:37:39.303Z",
+      "status": "approved",
+      "task": "CYCLE TEST: Click Approve to verify platform opens and prompt copies",
+      "files": [],
+      "threadId": "388b8fa3-eee7-4d3d-8c72-7d718e3a1dba",
+      "project": "inbox",
+      "routing": "direct"
+    }
+  ],
+  "replit/quack": [
+    {
+      "id": "1b1b84c2-eea1-4f27-a2e3-478328d2e527",
+      "to": "replit/quack",
+      "from": "claude/test",
+      "timestamp": "2026-01-25T18:33:14.547Z",
+      "expiresAt": "2026-01-27T18:33:14.547Z",
+      "status": "in_progress",
+      "task": "Testing the full approval workflow with copy and platform open",
+      "files": [],
+      "threadId": "1b1b84c2-eea1-4f27-a2e3-478328d2e527",
       "routing": "direct"
     }
   ]
