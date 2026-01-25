@@ -120,6 +120,24 @@
         "notify-agent"
       ],
       "routing": "direct"
+    },
+    {
+      "id": "090c244a-1de3-48a2-a493-f085b7473f29",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T20:47:31.810Z",
+      "expiresAt": "2026-01-27T20:47:31.810Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"5d612c7c-54ce-40c6-8b81-216d6b8aac25\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:5d612c7c\",\"messageSummary\":\"TEST v2: Now with auto-clipboard copy and status message\"}",
+      "files": [],
+      "threadId": "090c244a-1de3-48a2-a493-f085b7473f29",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
     }
   ],
   "replit/quack": [
@@ -165,7 +183,7 @@
       "from": "claude/test3",
       "timestamp": "2026-01-25T20:46:58.164Z",
       "expiresAt": "2026-01-27T20:46:58.164Z",
-      "status": "pending",
+      "status": "in_progress",
       "task": "TEST v2: Now with auto-clipboard copy and status message",
       "files": [],
       "threadId": "5d612c7c-54ce-40c6-8b81-216d6b8aac25",
