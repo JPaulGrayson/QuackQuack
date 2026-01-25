@@ -228,6 +228,24 @@
         "notify-agent"
       ],
       "routing": "direct"
+    },
+    {
+      "id": "4fa7d673-319c-4650-8ab5-a222fc0c9864",
+      "to": "claude",
+      "from": "quack/system",
+      "timestamp": "2026-01-25T21:21:47.292Z",
+      "expiresAt": "2026-01-27T21:21:47.292Z",
+      "status": "approved",
+      "task": "{\"action\":\"notify-agent\",\"target\":\"replit/quack\",\"messageId\":\"efd1840b-8157-4151-8915-5baba9b43fb7\",\"platformUrl\":\"https://replit.com/@jpaulgrayson/Quack\",\"prompt\":\"quack id:efd1840b\",\"messageSummary\":\"Testing improved tip visibility\"}",
+      "files": [],
+      "threadId": "4fa7d673-319c-4650-8ab5-a222fc0c9864",
+      "project": "automation",
+      "priority": "high",
+      "tags": [
+        "automation",
+        "notify-agent"
+      ],
+      "routing": "direct"
     }
   ],
   "replit/quack": [
@@ -357,7 +375,7 @@
       "from": "claude/test",
       "timestamp": "2026-01-25T21:21:33.855Z",
       "expiresAt": "2026-01-27T21:21:33.855Z",
-      "status": "pending",
+      "status": "in_progress",
       "task": "Testing improved tip visibility",
       "files": [],
       "threadId": "efd1840b-8157-4151-8915-5baba9b43fb7",
