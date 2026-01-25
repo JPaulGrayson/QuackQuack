@@ -308,6 +308,30 @@
       "files": [],
       "threadId": "39377731-37a1-4d10-8c90-05ce42aa19bc",
       "routing": "direct"
+    },
+    {
+      "id": "9cf9f15f-dfc5-43b4-a538-af8b442f6f2d",
+      "to": "replit/quack",
+      "from": "claude/test",
+      "timestamp": "2026-01-25T21:20:14.524Z",
+      "expiresAt": "2026-01-27T21:20:14.524Z",
+      "status": "pending",
+      "task": "Testing the new approval toast with helpful tips!",
+      "files": [],
+      "threadId": "9cf9f15f-dfc5-43b4-a538-af8b442f6f2d",
+      "routing": "direct"
+    },
+    {
+      "id": "7e49d6d2-de5b-43a1-9646-fb682b8c1048",
+      "to": "replit/quack",
+      "from": "claude/test",
+      "timestamp": "2026-01-25T21:20:19.143Z",
+      "expiresAt": "2026-01-27T21:20:19.143Z",
+      "status": "pending",
+      "task": "Testing the new approval toast with helpful tips!",
+      "files": [],
+      "threadId": "7e49d6d2-de5b-43a1-9646-fb682b8c1048",
+      "routing": "direct"
     }
   ]
 }
