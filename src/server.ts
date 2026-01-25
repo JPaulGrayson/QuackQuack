@@ -989,13 +989,9 @@ app.post('/api/voyai/session', (req, res) => {
   const authHeader = req.headers.authorization;
   const expectedKey = process.env.VOYAI_API_KEY;
   
-  // TODO: Uncomment this auth check when ready to enable sign-in
-  // if (!authHeader || authHeader !== `Bearer ${expectedKey}`) {
-  //   return res.status(401).json({ error: 'Unauthorized' });
-  // }
-  
-  // For now, allow without auth for testing (remove this when enabling)
-  console.log('[Voyai Session] Auth check bypassed for testing');
+  if (!authHeader || authHeader !== `Bearer ${expectedKey}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   
   const sessionData: VoyaiSessionData = req.body;
   

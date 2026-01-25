@@ -3385,16 +3385,8 @@ curl -X POST "${API_BASE}/api/context/checkpoint" \\
     loadStats();
     loadInboxes();
     
-    // Initialize Voyai session - TEMPORARILY DISABLED FOR TESTING
+    // Initialize Voyai session
     async function checkVoyaiAuth() {
-      // VOYAI AUTH DISABLED - return mock session for testing
-      console.log('Voyai auth temporarily disabled for testing');
-      const mockSession = { success: true, email: 'test@quack.us.com', tier: 'free', features: { universal_inbox: true, notifications: true, workflow_management: true, file_attachments: true, auto_dispatch: true } };
-      updatePremiumUI(mockSession);
-      showUserInfo(mockSession);
-      return mockSession;
-      
-      /* ORIGINAL VOYAI AUTH CODE - UNCOMMENT WHEN READY
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const incomingToken = urlParams.get('token');
@@ -3437,7 +3429,6 @@ curl -X POST "${API_BASE}/api/context/checkpoint" \\
         window.location.href = `https://voyai.org/login?return_to=${returnUrl}`;
         return null;
       }
-      */
     }
     
     function showUserInfo(session) {

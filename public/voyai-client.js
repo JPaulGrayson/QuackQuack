@@ -75,13 +75,8 @@ const VoyaiClient = {
   // Redirect to Voyai login
   // NOTE: Sign-in currently disabled - uncomment when ready
   loginWithVoyai() {
-    // TODO: Uncomment when ready to enable sign-in
-    // const returnUrl = encodeURIComponent(window.location.origin);
-    // window.location.href = `${this.baseUrl}/login?return_to=${returnUrl}&app=quack`;
-    
-    // For now, show disabled message
-    console.log('[Voyai] Sign-in temporarily disabled for testing');
-    alert('Voyai sign-in is temporarily disabled. Using test mode.');
+    const returnUrl = encodeURIComponent(window.location.origin);
+    window.location.href = `${this.baseUrl}/login?return_to=${returnUrl}&app=quack`;
   },
 
   // Logout
