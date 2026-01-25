@@ -2775,20 +2775,39 @@ pollQuackInbox();`;
       }, 15000);
     }
     
-    // Show simple approval toast with link (no notify prompt)
+    // Show actionable approval toast with platform link and copy functionality
     function showApprovalToast(agentName, platformUrl) {
       const container = document.getElementById('toast-container');
       
       const toast = document.createElement('div');
       toast.className = 'toast';
       toast.style.borderColor = '#4caf50';
+      toast.style.minWidth = '320px';
+      
+      const toastId = 'approval-toast-' + Date.now();
+      
       toast.innerHTML = `
         <div class="toast-header">
-          <span class="toast-title" style="color: #4caf50;">✓ Approved for ${escapeHtml(agentName)}</span>
+          <span class="toast-title" style="color: #4caf50;">🦆 Message approved for ${escapeHtml(agentName)}</span>
           <button class="toast-close" onclick="this.closest('.toast').remove()">×</button>
         </div>
-        <div class="toast-body">
-          ${platformUrl ? `<a href="${escapeHtml(platformUrl)}" target="_blank" style="color: #00d9ff;">Open ${escapeHtml(agentName)} platform →</a>` : 'Message approved and ready for processing.'}
+        <div class="toast-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+          ${platformUrl ? `
+            <a href="${escapeHtml(platformUrl)}" target="_blank" 
+               style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(0, 217, 255, 0.1); border: 1px solid #00d9ff; border-radius: 4px; color: #00d9ff; text-decoration: none; font-weight: 500;"
+               onclick="copyQuackPrompt(this)">
+              🔗 Open ${escapeHtml(agentName)} platform
+            </a>
+            <div style="font-size: 0.85rem; color: #aaa; margin-top: 0.25rem;">
+              💡 Say <strong style="color: #ffeb3b;">"quack"</strong> to wake the agent
+            </div>
+          ` : `
+            <div style="color: #aaa;">Message approved and ready for processing.</div>
+          `}
+          <button id="${toastId}-copy" onclick="copyQuackPromptBtn(this)" 
+                  style="padding: 0.4rem 0.6rem; background: #4caf50; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 0.8rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.3rem;">
+            📋 Copy "quack" prompt
+          </button>
         </div>
       `;
       
@@ -2796,7 +2815,38 @@ pollQuackInbox();`;
       
       setTimeout(() => {
         if (toast.parentNode) toast.remove();
-      }, 8000);
+      }, 12000);
+    }
+    
+    // Copy quack prompt when clicking platform link
+    async function copyQuackPrompt(linkElement) {
+      try {
+        await navigator.clipboard.writeText('Check your Quack inbox');
+      } catch (e) {
+        console.log('Clipboard copy failed silently');
+      }
+    }
+    
+    // Copy quack prompt from button
+    async function copyQuackPromptBtn(button) {
+      try {
+        await navigator.clipboard.writeText('Check your Quack inbox');
+        button.innerHTML = '✓ Copied!';
+        button.style.background = '#2e7d32';
+        setTimeout(() => {
+          button.innerHTML = '📋 Copy "quack" prompt';
+          button.style.background = '#4caf50';
+        }, 2000);
+      } catch (e) {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = 'Check your Quack inbox';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        button.innerHTML = '✓ Copied!';
+      }
     }
     
     // Copy current notify prompt to clipboard
