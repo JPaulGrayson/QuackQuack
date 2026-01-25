@@ -3294,32 +3294,39 @@ pollQuackInbox();`;
       try {
         const res = await fetch(`${API_BASE}/api/inboxes`);
         const { inboxes } = await res.json();
+        console.log('🦆 Found inboxes:', inboxes);
         
+        let pendingCount = 0;
         for (const inbox of inboxes) {
           const inboxRes = await fetch(`${API_BASE}/api/inbox/${inbox}`);
           const { messages } = await inboxRes.json();
           
           for (const msg of messages) {
             // Show toast if: pending AND not shown before
-            // On initial load (showAllPending=true): show ALL pending messages
             if (msg.status === 'pending' && !shownToastIds.has(msg.id)) {
+              pendingCount++;
+              console.log('🦆 Showing toast for pending message:', msg.id, 'from:', msg.from);
               shownToastIds.add(msg.id);
               showToast(msg);
             }
           }
         }
+        console.log('🦆 Total pending toasts shown:', pendingCount);
       } catch (e) {
         console.log('Could not fetch new messages for toast:', e);
       }
     }
     
-    // Show pending message toasts on page load
+    // Show pending message toasts after auth
     async function showPendingToastsOnLoad() {
       if (initialLoadComplete) return;
       initialLoadComplete = true;
       
+      console.log('🦆 showPendingToastsOnLoad called');
+      
       // Small delay to let page render first
       setTimeout(async () => {
+        console.log('🦆 Fetching pending messages for toasts...');
         await showNewMessageToasts(true);
       }, 1500);
     }
@@ -3493,8 +3500,7 @@ pollQuackInbox();`;
     loadStats();
     loadInboxes();
     
-    // Show toasts for any pending messages after page load
-    showPendingToastsOnLoad();
+    // NOTE: showPendingToastsOnLoad() is called after Voyai auth completes (in checkVoyaiAuth)
     
     // Initialize Voyai session
     async function checkVoyaiAuth() {
@@ -3532,6 +3538,11 @@ pollQuackInbox();`;
         console.log('Voyai session:', data.tier, data.email);
         updatePremiumUI(data);
         showUserInfo(data);
+        
+        // Show pending message toasts after authentication is complete
+        console.log('🦆 Auth complete - checking for pending toasts...');
+        showPendingToastsOnLoad();
+        
         return data;
       } catch (e) {
         console.error('Voyai auth check failed:', e);
