@@ -9,7 +9,7 @@
       "platformUrl": "https://claude.ai",
       "notifyPrompt": "Check your Quack inbox at /claude",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.018Z"
+      "lastActivity": "2026-01-25T21:31:22.306Z"
     },
     "gpt": {
       "name": "gpt",
@@ -20,7 +20,7 @@
       "platformUrl": "https://chat.openai.com",
       "notifyPrompt": "Check your Quack inbox at /gpt",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.015Z"
+      "lastActivity": "2026-01-25T21:31:22.402Z"
     },
     "gemini": {
       "name": "gemini",
@@ -31,7 +31,7 @@
       "platformUrl": "https://gemini.google.com",
       "notifyPrompt": "Check your Quack inbox at /gemini",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.019Z"
+      "lastActivity": "2026-01-25T21:31:22.303Z"
     },
     "grok": {
       "name": "grok",
@@ -42,7 +42,7 @@
       "platformUrl": "https://grok.x.ai",
       "notifyPrompt": "Check your Quack inbox at /grok",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.103Z"
+      "lastActivity": "2026-01-25T21:31:22.396Z"
     },
     "copilot": {
       "name": "copilot",
@@ -53,7 +53,7 @@
       "platformUrl": "https://copilot.microsoft.com",
       "notifyPrompt": "Check your Quack inbox at /copilot",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.110Z"
+      "lastActivity": "2026-01-25T21:31:22.399Z"
     },
     "replit": {
       "name": "replit",
@@ -64,7 +64,7 @@
       "platformUrl": "https://replit.com/@jpaulgrayson/Quack",
       "notifyPrompt": "quack",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.112Z"
+      "lastActivity": "2026-01-25T21:31:22.498Z"
     },
     "cursor": {
       "name": "cursor",
@@ -74,7 +74,7 @@
       "notifyVia": "polling",
       "notifyPrompt": "Check your Quack inbox at /cursor",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.017Z"
+      "lastActivity": "2026-01-25T21:31:22.302Z"
     },
     "antigravity": {
       "name": "antigravity",
@@ -83,7 +83,7 @@
       "autoApproveOnCheck": true,
       "notifyVia": "polling",
       "registeredAt": "2026-01-21T16:24:57.197Z",
-      "lastActivity": "2026-01-25T21:30:50.108Z"
+      "lastActivity": "2026-01-25T21:31:22.400Z"
     }
   },
   "routedMessages": {}
