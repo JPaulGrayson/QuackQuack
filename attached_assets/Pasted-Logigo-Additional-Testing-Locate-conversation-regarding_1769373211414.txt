@@ -1,0 +1,128 @@
+Logigo Additional Testing
+
+Locate conversation regarding adding a reverse flowchart coding feature. Ask the agent to create a flowchart for a concept. View and discuss, then ask the agent to write the code for it
+
+Change Cage Match to Grudge match
+Adjust X profile to be more Professional
+
+- Change statement “Made with Love for Vibe Coders everywhere
+- Adjust positioning to both Vibe Coders and Professional coders
+
+MCP tutorial 
+Ghost Diff
+
+The "Founder Safety" Checklist (Do this manually)
+You don't need to test every edge case, but you must verify the "Data Integrity" loop.
+1. The "Voyai Handshake":
+    * Action: Log out. Clear cookies. Log in with a new email address (act like a stranger).
+    * Pass Condition: You land on the LogiGo chart, and the "Upgrade" button correctly identifies you as "Free" (or "Founder" if you manually assigned it).
+2. The "Time Machine" (Database Save):
+    * Action: (As a Pro/Founder user) Create a chart. Reload the page.
+    * Pass Condition: The chart is still there. (This is the #1 feature they are "paying" for. It cannot fail).
+3. The "Credit Limit" (The Proxy):
+    * Action: (As a Pro/Founder user with NO custom API key set) Run the Council once.
+    * Pass Condition: It works, and the UI meter updates (e.g., "Credits: 1/50").
+    * Action: (As a Free user) Run the Council.
+    * Pass Condition: It blocks you and asks for a key.
+4. The "Git Sync" (Data Exit):
+    * Action: (As a Pro user) Click "Sync to GitHub."
+    * Pass Condition: A file appears in the repo. (If this corrupts their repo, they will be angry).
+5. The "Rescue" Button:
+    * Action: Break a node intentionally. Click "Rescue."
+    * Pass Condition: The app doesn't crash to a white screen.
+
+Available without signing in:
+* Paste code → see flowchart (the main feature)
+* Step through execution
+* View complexity score
+* Use code examples
+* Ghost Diff visualization
+* Share flowcharts
+Requires sign-in (Pro/Founder features):
+* Model Arena (AI comparison) - needs API keys or managed allowance
+* Save arena sessions to database
+* Rabbit Hole Rescue
+* GitHub Sync
+
+
+Code Council
+
+Document AI Model interaction features
+- Ask AI to write the code in a node or container
+- Ask AI to run the Model Arena / Code Council / Headless council
+- Ask AI to show where an error/issue is located in the flowchart / code
+- Talk to the agent and get him to do code related tasks
+- Ask the agent to rewrite code in a selected node or add a new node with code it writes
+
+Rabbit Hole Rescue demo
+
+Independently test the Model Arena
+
+Think about the integration of the agent and Logigo and how to consistently use AI for coding and communication of details specs including code fixes - Replit and Antigravity are the development partners for new apps and should take as much responsibility as possible and minimize any need for user to actually write code
+
+Add labels
+Bidirectional editing
+Model Arena
+- Arena Example prompts
+Debug Arena
+View levels
+Collapsible containers
+Visual Handshake
+Ghost Diff
+Breakpoints
+Variable History timeline
+Sharable URL’s
+Layout Presets
+Zoom Presets
+Undo/Redo History
+Algorithmic Examples
+Execution Controls
+Advanced Features
+- Time Travel
+- Export 
+- Natural language search
+Bidirectional Sync 
+- LogiGo File Sync & Watch Mode
+VS Code extension
+
+Test Suite 1: The "Fidget" Test (UI State & Layouts)
+Goal: Verify that messing with the view settings doesn't break the rendering. Features Covered: Layout Presets, Zoom Presets, View Levels, Collapsible Containers, Add Labels.
+Prompt for Replit Agent: "I need to perform a UI Stress Test on the Workbench. Please open the browser preview and perform the following sequence while I watch:
+1. Layouts: Cycle through every Layout Preset (50/50, 30/70, Flow Only). Ensure the panels resize correctly each time.
+2. Zoom: Click the 'Fit' zoom button, then manually zoom in to 100%, then out to 25%.
+3. Containers: Find a container node in the flowchart (or load the 'Bubble Sort' example). Collapse it, then expand it. Verify the edges redraw correctly.
+4. Labels: Double-click a node and add a User Label (// @logigo: Test Label). Verify the blue dot appears.
+5. View Levels: If available, toggle the 'Mile High' vs '1000ft' view and verify detail reduction."
+
+Test Suite 2: The "Time Traveler" Test (Execution Engine)
+Goal: Verify the interpreter, history, and variable tracking. Features Covered: Algorithmic Examples, Execution Controls, Breakpoints, Variable History, Undo/Redo, Time Travel.
+Prompt for Replit Agent: "I need to test the Execution Engine. Please load the 'Bubble Sort' example and do the following:
+1. Breakpoints: Right-click the inner loop node to set a red Breakpoint.
+2. Execution: Press 'Play'. Verify it pauses at your breakpoint.
+3. Variables: Open the 'Variables' tab. Check that the array values are visible.
+4. Time Travel: Use the 'Step Back' button (or scrub the timeline) to go back 3 steps. Verify the variables update to their previous state.
+5. History: Go to the code editor, delete a line, then press the 'Undo' button in the toolbar. Verify the code returns."
+
+Test Suite 3: The "Council" Test (AI & External Data)
+Goal: Verify the AI Arena UI and Sharing. (Note: This costs tokens, so we verify the flow). Features Covered: Model Arena, Example Prompts, Sharable URLs, Ghost Diff.
+Prompt for Replit Agent: "I need to test the AI features. Please navigate to the Model Arena page:
+1. Templates: Use the dropdown to select the 'Find Duplicates' example prompt.
+2. Generation: Click 'Generate'. (Wait for the 4 panels to load).
+3. Ghost Diff: Copy one of the AI responses. Go back to the Workbench, paste it over the current code, and toggle 'Ghost Diff'. Verify you see the Green/Red visual changes.
+4. Sharing: Click the 'Share' button in the header. Create a link with the title 'Test Share'. Click the resulting link and verify it opens the Read-Only view."
+
+Test Suite 4: The "Deep System" Test (File Sync)
+Goal: Verify the "Watch Mode" where backend files update the frontend. Features Covered: LogiGo File Sync, Watch Mode, Natural Language Search.
+Prompt for Replit Agent: "I need to test the 'Watch Mode' and file sync.
+1. Setup: Open the LogiGo Workbench in the browser.
+2. Backdoor Edit: In a separate shell or file editor tab, manually edit data/flowchart.json (or the current source file). Change a node label text to 'HACKED BY AGENT'.
+3. Verification: Switch back to the browser. Verify that the flowchart updates automatically within 2-3 seconds without a manual refresh.
+4. Search: Use the Natural Language Search bar (Cmd+K) and type 'loops'. Verify it highlights the forloops in the chart."
+
+Summary Checklist for YOU (The Human)
+While the Agent runs these, here is what you specifically need to look for:
+* [ ] Visual Handshake: (Manual Test) When you click a node, does the Code Editor scroll to the right line?
+* [ ] VS Code Extension: (Manual Test) Does the extension load? Does clicking a node in VS Code highlight it in the WebView?
+* [ ] Latency: When the Agent does "Time Travel," is the variable update instant, or does it lag?
+* [ ] Layout Thrashing: When the Agent switches Layouts, does the graph briefly look "exploded" before settling? (A common bug).
+* Would you like me to refine the "File Sync" prompt to include specific shell commands for the Agent to run?
