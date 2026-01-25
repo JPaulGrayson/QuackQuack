@@ -3332,7 +3332,9 @@ pollQuackInbox();`;
     }
 
     function showToast(message) {
+      console.log('🦆 showToast called for:', message.id);
       const container = document.getElementById('toast-container');
+      console.log('🦆 Toast container found:', !!container);
       
       // Double-check: don't show if a toast with this ID already exists in DOM
       if (container.querySelector(`[data-id="${message.id}"]`)) {
@@ -3364,6 +3366,7 @@ pollQuackInbox();`;
       `;
       
       container.appendChild(toast);
+      console.log('🦆 Toast appended to DOM for message:', message.id);
       
       // No auto-dismiss - user must click to close or take action
     }
