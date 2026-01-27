@@ -556,5 +556,20 @@
       "threadId": "9d339d65-a1ad-44cb-8300-fedfbba33164",
       "routing": "direct"
     }
+  ],
+  "claude/web": [
+    {
+      "id": "ee6d9ff6-3c3c-4891-9f01-7c8787a92d46",
+      "to": "claude/web",
+      "from": "replit/quack",
+      "timestamp": "2026-01-27T19:43:39.550Z",
+      "expiresAt": "2026-01-29T19:43:39.550Z",
+      "status": "approved",
+      "task": "Bug fix confirmed - inbox routing now works",
+      "files": [],
+      "threadId": "ee6d9ff6-3c3c-4891-9f01-7c8787a92d46",
+      "project": "web",
+      "routing": "direct"
+    }
   ]
 }

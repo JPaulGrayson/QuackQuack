@@ -219,20 +219,15 @@ app.post('/api/send', (req, res) => {
       });
     }
     
-    // Consolidate conversational agent inboxes to root
-    // e.g., claude/inbox, claude/project -> claude (with project metadata preserved)
-    const CONVERSATIONAL_AGENTS = ['claude', 'gpt', 'gemini', 'grok', 'copilot'];
-    let targetInbox = request.to.replace(/^\/+/, ''); // Remove leading slashes
-    const rootAgent = targetInbox.split('/')[0].toLowerCase();
+    // Preserve full inbox path for conversational agents
+    // e.g., claude/web stays as claude/web (no longer consolidated to root)
+    // Extract project from path if not explicitly provided
+    const targetInbox = request.to.replace(/^\/+/, ''); // Remove leading slashes
+    const pathParts = targetInbox.split('/');
     
-    if (CONVERSATIONAL_AGENTS.includes(rootAgent) && targetInbox.includes('/')) {
-      // Consolidate to root inbox for conversational agents
-      targetInbox = rootAgent;
-      request.to = rootAgent;
-      // Ensure project metadata exists for root inbox delivery
-      if (!request.project) {
-        request.project = 'inbox';
-      }
+    if (pathParts.length >= 2 && !request.project) {
+      // Use the second part of the path as project metadata if not set
+      request.project = pathParts.slice(1).join('/');
     }
     
     // Validate inbox path format
