@@ -518,6 +518,67 @@ export class QuackBridge {
       });
     });
     
+    router.get('/relay', async (req: Request, res: Response) => {
+      const { from, to, task, context, project, priority, replyTo } = req.query;
+      
+      if (!from || !to || !task) {
+        return res.status(400).json({
+          error: 'Missing required query params: from, to, task',
+          usage: '/bridge/relay?from=grok/main&to=claude/web&task=Hello%20Claude',
+          hint: 'URL-encode special characters in task and context'
+        });
+      }
+      
+      const pathValidation = validateInboxPath(to as string, true);
+      if (!pathValidation.valid) {
+        return res.status(400).json({ error: pathValidation.error });
+      }
+      
+      try {
+        const message = sendMessage({
+          to: to as string,
+          from: from as string,
+          task: decodeURIComponent(task as string),
+          context: context ? decodeURIComponent(context as string) : undefined,
+          project: project as string,
+          priority: priority as 'low' | 'normal' | 'high' | 'urgent',
+          replyTo: replyTo as string,
+        }, from as string);
+        
+        approveMessage(message.id);
+        
+        try {
+          await logAudit(
+            'message.approve',
+            from as string,
+            'message',
+            message.id,
+            {
+              reason: 'Auto-approved: GET relay for GET-only agents',
+              source: 'bridge-relay',
+              to: to as string
+            }
+          );
+        } catch (auditErr) {
+          console.error('[Bridge] Relay audit log failed:', auditErr);
+        }
+        
+        console.log(`[Bridge] GET relay: ${from} -> ${to} (${message.id})`);
+        
+        res.json({
+          success: true,
+          message_id: message.id,
+          from: message.from,
+          to: message.to,
+          status: message.status,
+          hint: 'Message sent and auto-approved via GET relay'
+        });
+      } catch (err) {
+        console.error('[Bridge] Relay error:', err);
+        res.status(500).json({ error: 'Failed to send message via relay' });
+      }
+    });
+    
     return router;
   }
 
