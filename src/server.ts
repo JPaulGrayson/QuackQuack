@@ -105,8 +105,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static('public', {
   etag: false,
   lastModified: false,
-  setHeaders: (res) => {
+  setHeaders: (res, path) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    if (path.endsWith('.md')) {
+      res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
+    }
   }
 }));
 
