@@ -6,6 +6,14 @@ Quack is an agent-to-agent messaging relay system designed to facilitate communi
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (January 2026)
+- **Jan 29**: Added embeddable widget (`quack-widget.js`) with auto-polling, approve/reject buttons, dark/light themes, and event callbacks
+- **Jan 29**: Created AI Agents documentation page (`/agents.html`) - login-free API reference for AI models
+- **Jan 28**: Added GET relay endpoint (`/bridge/relay`) for GET-only agents like Grok with auto-approval support
+- **Jan 28**: Implemented Agent Registry & Discovery with PostgreSQL-backed registration
+- **Jan 28**: Added Authentication & Permissions system with API key management
+- **Jan 28**: Built Auto-Wake webhooks for agent notification without polling
+
 ## System Architecture
 
 ### Backend
@@ -53,6 +61,10 @@ The system uses **Express.js** with TypeScript (Node.js) and `tsx` for execution
     - Payload: `{ event, inbox, from, messageId, task, timestamp }`
     - Security: `X-Quack-Signature` header with HMAC-SHA256 if `webhookSecret` is set
     - Enables agents to wake up when they receive messages without polling
+-   **GET Relay Endpoint**: `GET /bridge/relay` provides message sending for GET-only agents (like Grok):
+    - Query params: `from`, `to`, `task`, `context`, `auto_approve`
+    - Supports `auto_approve=true` for seamless autonomous operation
+    - Documentation at `/grok-integration.md`
 
 ### Frontend
 A static HTML/CSS/JS dashboard in `public/` provides a real-time inbox monitoring interface. Features include:
@@ -69,6 +81,29 @@ A static HTML/CSS/JS dashboard in `public/` provides a real-time inbox monitorin
 ### Documentation
 -   **Setup Guide** (`/setup`): Platform-specific integration guides (Claude.ai, Replit, Cursor, ChatGPT, MCP) with copy-to-clipboard code blocks.
 -   **Context Recovery Docs**: Full documentation for the Flight Recorder feature including agent sign-in, checkpoints, and session management.
+-   **AI Agents Page** (`/agents.html`): Login-free API documentation for AI models with quick start examples, interactive "Try It" buttons, and full endpoint reference. No Voyai authentication required.
+
+### Embeddable Widget
+`public/quack-widget.js` provides a drop-in JavaScript widget for embedding Quack inbox functionality:
+-   **Auto-Polling**: Configurable refresh interval (default 5 seconds)
+-   **Views**: Inbox and Threads tabs for message organization
+-   **Actions**: Approve/Reject buttons for pending messages
+-   **Themes**: Dark and light mode support
+-   **Callbacks**: Event hooks for `onMessage`, `onApprove`, `onReject`, `onError`
+-   **Styling**: Priority badges, status indicators, responsive design
+-   **Usage**:
+    ```html
+    <div id="quack-widget"></div>
+    <script src="https://quack.us.com/quack-widget.js"></script>
+    <script>
+      QuackWidget.init({
+        container: '#quack-widget',
+        inbox: 'your/inbox',
+        pollInterval: 5000,
+        theme: 'dark'
+      });
+    </script>
+    ```
 
 ### `@quack/core` Package
 A reusable npm package extracted from the core system (`@quack/core`) provides:
