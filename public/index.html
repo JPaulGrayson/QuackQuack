@@ -1036,7 +1036,7 @@
     <div class="view-toggle" style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
       <button class="btn btn-primary" id="inbox-view-btn" onclick="showInboxView()">📥 Inboxes</button>
       <button class="btn btn-secondary" id="thread-view-btn" onclick="showThreadView()">💬 Threads</button>
-      <button class="btn btn-secondary" id="cowork-view-btn" onclick="showCoWorkView()">🤖 Agents</button>
+      <button class="btn btn-secondary" id="agents-view-btn" onclick="showAgentsView()">🤖 Agents</button>
       <button class="btn btn-secondary" id="sessions-view-btn" onclick="showSessionsView()">🧠 Sessions</button>
       <button class="btn btn-secondary" id="audit-view-btn" onclick="showAuditView()">📋 Audit</button>
       <button class="btn btn-secondary" id="control-room-view-btn" onclick="showControlRoomView()" style="background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(103, 58, 183, 0.3));">🎛️ Control Room</button>
@@ -1050,8 +1050,8 @@
       <!-- Thread list will be rendered here -->
     </div>
 
-    <div class="cowork-view" id="cowork" style="display: none;">
-      <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="agents-view" id="agents" style="display: none;">
+      <div class="agents-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
         <div class="stat" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3);">
           <div class="stat-value" id="agents-online">-</div>
           <div class="stat-label">Online</div>
@@ -1069,7 +1069,6 @@
         <!-- Agent cards will be rendered here -->
       </div>
     </div>
-
 
     <div class="sessions-view" id="sessions" style="display: none;">
       <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -1808,7 +1807,7 @@
     let currentView = 'inbox';
 
     function setActiveTab(activeBtn) {
-      const buttons = ['inbox-view-btn', 'thread-view-btn', 'cowork-view-btn'];
+      const buttons = ['inbox-view-btn', 'thread-view-btn', 'agents-view-btn'];
       buttons.forEach(btn => {
         const el = document.getElementById(btn);
         if (btn === activeBtn) {
@@ -1825,7 +1824,7 @@
       currentView = 'inbox';
       document.getElementById('inboxes').style.display = 'grid';
       document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('agents').style.display = 'none';
       
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
@@ -1837,7 +1836,7 @@
       currentView = 'threads';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'grid';
-      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('agents').style.display = 'none';
       
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
@@ -1846,16 +1845,16 @@
       loadThreads();
     }
 
-    function showCoWorkView() {
-      currentView = 'cowork';
+    function showAgentsView() {
+      currentView = 'agents';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'block';
+      document.getElementById('agents').style.display = 'block';
       
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
-      setActiveTab('cowork-view-btn');
+      setActiveTab('agents-view-btn');
       loadAgents();
     }
 
@@ -1866,7 +1865,7 @@
       currentView = 'sessions';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('agents').style.display = 'none';
       
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
@@ -2000,7 +1999,7 @@
       currentView = 'audit';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('agents').style.display = 'none';
       
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
@@ -2122,7 +2121,7 @@
       currentView = 'control-room';
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('agents').style.display = 'none';
       
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
