@@ -2881,30 +2881,142 @@
       try {
         const res = await fetch(`${API_BASE}/api/inboxes`);
         const data = await res.json();
-        const inboxes = data.inboxes || [];
+        const apiInboxes = data.inboxes || [];
 
-        if (inboxes.length === 0) {
-          container.innerHTML = '<p style="color: #888;">No inboxes found.</p>';
-          return;
-        }
+        // Default parent inboxes (always shown, same as main Inboxes tab)
+        const defaultParents = ['claude', 'replit', 'cursor', 'gemini', 'gpt', 'grok', 'copilot', 'antigravity'];
+        
+        // Combine defaults with any additional inboxes from API
+        const allInboxes = [...new Set([...defaultParents, ...apiInboxes])];
 
-        let html = '';
-        for (const inbox of inboxes) {
-          const msgRes = await fetch(`${API_BASE}/api/inbox/${inbox}`);
-          const msgData = await msgRes.json();
-          const pending = msgData.messages?.filter(m => m.status === 'pending').length || 0;
+        // Fetch message counts for all inboxes in parallel
+        const inboxData = {};
+        await Promise.all(allInboxes.map(async (inbox) => {
+          try {
+            const msgRes = await fetch(`${API_BASE}/api/inbox/${inbox}?includeRead=true`);
+            const msgData = await msgRes.json();
+            const messages = msgData.messages || [];
+            const pending = messages.filter(m => m.status === 'pending').length;
+            const inProgress = messages.filter(m => m.status === 'in_progress').length;
+            inboxData[inbox] = { messages, pending, inProgress, total: messages.length };
+          } catch (e) {
+            inboxData[inbox] = { messages: [], pending: 0, inProgress: 0, total: 0 };
+          }
+        }));
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+        
+        for (const inbox of allInboxes) {
+          const data = inboxData[inbox];
+          const pendingClass = data.pending > 0 ? 'status-pending' : 'status-approved';
+          const hasActivity = data.total > 0;
           
           html += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
-              <span style="color: #e0e0e0;">/${inbox}</span>
-              <span class="${pending > 0 ? 'status-pending' : 'status-approved'}" style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">${pending} pending</span>
+            <div class="cr-inbox-item" data-inbox="${inbox}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border-radius: 8px; cursor: pointer; border: 1px solid ${hasActivity ? '#3a4a5a' : '#2a3a4a'}; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,152,0,0.1)'; this.style.borderColor='#ff9800'" onmouseout="this.style.background='rgba(0,0,0,0.3)'; this.style.borderColor='${hasActivity ? '#3a4a5a' : '#2a3a4a'}'">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.2rem;">${getInboxIcon(inbox)}</span>
+                <span style="color: #e0e0e0; font-weight: 500;">/${inbox}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                ${data.pending > 0 ? `<span class="${pendingClass}" style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">${data.pending} pending</span>` : ''}
+                ${data.inProgress > 0 ? `<span class="status-inprogress" style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">${data.inProgress} active</span>` : ''}
+                <span style="color: #666; font-size: 0.8rem;">${data.total} total</span>
+              </div>
             </div>
           `;
         }
+        
+        html += '</div>';
         container.innerHTML = html;
+
+        // Add click handlers
+        container.querySelectorAll('.cr-inbox-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const inbox = item.dataset.inbox;
+            crShowInboxMessages(inbox);
+          });
+        });
       } catch (e) {
         container.innerHTML = `<p style="color: #f44336;">Error loading inboxes: ${e.message}</p>`;
       }
+    }
+
+    function getInboxIcon(inbox) {
+      const icons = {
+        'claude': '🤖',
+        'replit': '💻',
+        'cursor': '🖱️',
+        'gemini': '✨',
+        'gpt': '🧠',
+        'grok': '🚀',
+        'copilot': '✈️',
+        'antigravity': '🔮'
+      };
+      return icons[inbox] || '📥';
+    }
+
+    async function crShowInboxMessages(inbox) {
+      const container = document.getElementById('cr-inboxes-list');
+      try {
+        const res = await fetch(`${API_BASE}/api/inbox/${inbox}?includeRead=true`);
+        const data = await res.json();
+        const messages = data.messages || [];
+
+        let html = `
+          <div style="margin-bottom: 1rem;">
+            <button onclick="crLoadInboxesList()" style="background: #3a4a5a; border: none; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+              ← Back to Inboxes
+            </button>
+          </div>
+          <h4 style="color: #ff9800; margin-bottom: 1rem;">${getInboxIcon(inbox)} /${inbox} - ${messages.length} messages</h4>
+        `;
+
+        if (messages.length === 0) {
+          html += '<p style="color: #888;">No messages in this inbox.</p>';
+        } else {
+          html += '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+          for (const msg of messages.slice(0, 20)) {
+            const statusClass = `status-${msg.status}`;
+            const time = new Date(msg.timestamp).toLocaleString();
+            html += `
+              <div style="padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 3px solid ${getStatusColor(msg.status)};">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                  <span style="color: #aaa; font-size: 0.85rem;">From: ${msg.from || 'unknown'}</span>
+                  <span class="${statusClass}" style="padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">${msg.status}</span>
+                </div>
+                <p style="color: #e0e0e0; margin: 0; font-size: 0.9rem; word-break: break-word;">${escapeHtml(msg.task?.substring(0, 150) || 'No task')}${msg.task?.length > 150 ? '...' : ''}</p>
+                <div style="margin-top: 0.5rem; color: #666; font-size: 0.75rem;">${time}</div>
+              </div>
+            `;
+          }
+          html += '</div>';
+          if (messages.length > 20) {
+            html += `<p style="color: #888; margin-top: 1rem; font-size: 0.85rem;">Showing 20 of ${messages.length} messages</p>`;
+          }
+        }
+        
+        container.innerHTML = html;
+      } catch (e) {
+        container.innerHTML = `<p style="color: #f44336;">Error loading messages: ${e.message}</p>`;
+      }
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'pending': '#ff9800',
+        'approved': '#4ade80',
+        'in_progress': '#00d9ff',
+        'completed': '#4ade80',
+        'failed': '#f44336'
+      };
+      return colors[status] || '#888';
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     async function crLoadAuditList() {
