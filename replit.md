@@ -7,6 +7,8 @@ Quack is an agent-to-agent messaging relay system designed to facilitate communi
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (January 2026)
+- **Jan 30**: Removed CoWork tab/feature (redundant - Control Room "Send Quack" replaces this functionality)
+- **Jan 30**: Fixed Control Room Inboxes sub-tab to show all 8 default agent inboxes with message counts
 - **Jan 30**: Enhanced Control Room with action buttons (Send Quack, New Workflow, Analyze Code, Run Template, Refresh All, Test Agent), stats bar (Inboxes, Messages, Pending, In Progress), sub-tabs (Inboxes, Quack Widget, Audit Trail, Agents, Threads), and Settings modal with auto-refresh/default layout options
 - **Jan 30**: Added Control Room feature for managing and launching multiple Replit agent windows in tiled layouts
 - **Jan 29**: Added embeddable widget (`quack-widget.js`) with auto-polling, approve/reject buttons, dark/light themes, and event callbacks
@@ -26,7 +28,7 @@ The system uses **Express.js** with TypeScript (Node.js) and `tsx` for execution
 -   **Model Context Protocol (MCP)**: `mcp-handler.ts` integrates with Claude Desktop via Server-Sent Events (SSE) using `@modelcontextprotocol/sdk`.
 -   **Webhooks**: `webhooks.ts` provides a push notification system for incoming messages and approval events.
 -   **Auto-Ping on Approval**: When messages are approved (manually or via auto-approve), Quack automatically: (1) triggers webhooks with `message.approved` event, and (2) sends a ping message to the destination agent's inbox. This solves the problem of agents going idle - they get notified even without persistent polling.
--   **CoWork Orchestration**: `cowork-store.ts` manages agent configurations, routing, and activity tracking for an optional orchestration layer.
+-   **Agent Configuration**: `cowork-store.ts` manages agent configurations and activity tracking (CoWork UI removed - Control Room replaces this).
 -   **Context Recovery**: `context-recovery.ts` implements a "Flight Recorder" for agent state persistence, journaling internal states, thoughts, and progress, with PostgreSQL-backed storage.
 -   **GPT Proxy**: `gpt-proxy.ts` enables ChatGPT participation via Replit AI Integrations (OpenAI). Monitors `gpt/main` inbox and auto-responds to approved messages using GPT-4o.
 -   **Archive & Audit System**: PostgreSQL-backed permanent storage for completed message threads and an audit trail of system actions.

@@ -1037,7 +1037,6 @@
       <button class="btn btn-primary" id="inbox-view-btn" onclick="showInboxView()">📥 Inboxes</button>
       <button class="btn btn-secondary" id="thread-view-btn" onclick="showThreadView()">💬 Threads</button>
       <button class="btn btn-secondary" id="cowork-view-btn" onclick="showCoWorkView()">🤖 Agents</button>
-      <button class="btn btn-secondary" id="routing-view-btn" onclick="showRoutingView()">🔀 CoWork</button>
       <button class="btn btn-secondary" id="sessions-view-btn" onclick="showSessionsView()">🧠 Sessions</button>
       <button class="btn btn-secondary" id="audit-view-btn" onclick="showAuditView()">📋 Audit</button>
       <button class="btn btn-secondary" id="control-room-view-btn" onclick="showControlRoomView()" style="background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(103, 58, 183, 0.3));">🎛️ Control Room</button>
@@ -1071,32 +1070,6 @@
       </div>
     </div>
 
-    <div class="routing-view" id="routing" style="display: none;">
-      <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
-        <div class="stat" style="background: rgba(255, 193, 7, 0.1); border-color: rgba(255, 193, 7, 0.3);">
-          <div class="stat-value" id="cowork-pending">-</div>
-          <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3);">
-          <div class="stat-value" id="cowork-approved">-</div>
-          <div class="stat-label">Approved</div>
-        </div>
-        <div class="stat" style="background: rgba(244, 67, 54, 0.1); border-color: rgba(244, 67, 54, 0.3);">
-          <div class="stat-value" id="cowork-rejected">-</div>
-          <div class="stat-label">Rejected</div>
-        </div>
-      </div>
-      
-      <div style="text-align: center; margin-bottom: 1.5rem;">
-        <button class="btn btn-primary" onclick="openCoWorkModal()" style="background: linear-gradient(135deg, #00d9ff, #0066ff);">
-          🔀 Send via CoWork
-        </button>
-      </div>
-
-      <div class="routing-list" id="routing-list" style="display: flex; flex-direction: column; gap: 1rem;">
-        <!-- CoWork routed messages will be rendered here -->
-      </div>
-    </div>
 
     <div class="sessions-view" id="sessions" style="display: none;">
       <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -1635,48 +1608,6 @@
     </div>
   </div>
 
-  <!-- CoWork Send Modal -->
-  <div class="modal-overlay" id="cowork-modal">
-    <div class="modal settings-modal">
-      <div class="modal-header">
-        <h2 class="modal-title">🔀 Send via CoWork</h2>
-        <button class="modal-close" onclick="closeCoWorkModal()">×</button>
-      </div>
-      <div id="cowork-modal-content" style="padding: 1.5rem;">
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: #ccc;">Destination Agent</label>
-          <select id="cowork-destination" class="api-key-input" style="width: 100%;">
-            <option value="">Select agent...</option>
-          </select>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: #ccc;">From</label>
-          <input type="text" id="cowork-from" class="api-key-input" placeholder="Your agent name (e.g., replit/project)" style="width: 100%;" />
-        </div>
-        
-        <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; margin-bottom: 0.5rem; color: #ccc;">Task / Message</label>
-          <textarea id="cowork-task" class="api-key-input" rows="4" placeholder="What should the agent do?" style="width: 100%; resize: vertical;"></textarea>
-        </div>
-        
-        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem;">
-          <label class="toggle-switch" style="margin: 0;">
-            <input type="checkbox" id="cowork-require-approval">
-            <span class="toggle-slider"></span>
-          </label>
-          <span style="color: #ccc;">Require Approval</span>
-          <span id="approval-hint" style="color: #888; font-size: 0.8rem; margin-left: auto;"></span>
-        </div>
-        
-        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-          <button class="btn btn-secondary" onclick="closeCoWorkModal()">Cancel</button>
-          <button class="btn btn-primary" onclick="sendViaCoWork()" style="background: linear-gradient(135deg, #00d9ff, #0066ff);">Send via CoWork</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Refresh Quack Modal -->
   <div id="refresh-quack-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center;">
     <div style="background: #1a2a3a; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; border: 1px solid #3a4a5a;">
@@ -1877,7 +1808,7 @@
     let currentView = 'inbox';
 
     function setActiveTab(activeBtn) {
-      const buttons = ['inbox-view-btn', 'thread-view-btn', 'cowork-view-btn', 'routing-view-btn'];
+      const buttons = ['inbox-view-btn', 'thread-view-btn', 'cowork-view-btn'];
       buttons.forEach(btn => {
         const el = document.getElementById(btn);
         if (btn === activeBtn) {
@@ -1895,7 +1826,7 @@
       document.getElementById('inboxes').style.display = 'grid';
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
@@ -1907,7 +1838,7 @@
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'grid';
       document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
@@ -1920,164 +1851,12 @@
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'block';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
       setActiveTab('cowork-view-btn');
       loadAgents();
-    }
-
-    function showRoutingView() {
-      currentView = 'routing';
-      document.getElementById('inboxes').style.display = 'none';
-      document.getElementById('threads').style.display = 'none';
-      document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'block';
-      document.getElementById('sessions').style.display = 'none';
-      document.getElementById('audit').style.display = 'none';
-      document.getElementById('control-room').style.display = 'none';
-      setActiveTab('routing-view-btn');
-      loadRoutingMessages();
-    }
-
-    async function loadRoutingMessages() {
-      try {
-        const res = await fetch(`${API_BASE}/api/cowork/messages`);
-        const { messages } = await res.json();
-        
-        const pendingCount = messages.filter(m => m.coworkStatus === 'pending').length;
-        const approvedCount = messages.filter(m => m.coworkStatus === 'approved').length;
-        const rejectedCount = messages.filter(m => m.coworkStatus === 'rejected').length;
-        
-        document.getElementById('cowork-pending').textContent = pendingCount;
-        document.getElementById('cowork-approved').textContent = approvedCount;
-        document.getElementById('cowork-rejected').textContent = rejectedCount;
-        
-        const container = document.getElementById('routing-list');
-        
-        if (messages.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: 3rem;">
-              <div style="font-size: 3rem;">🔀</div>
-              <p style="color: #888; margin-top: 1rem;">No CoWork routed messages. Use "Send via CoWork" to route a message!</p>
-            </div>
-          `;
-          return;
-        }
-        
-        container.innerHTML = messages.map(msg => {
-          const statusColor = msg.coworkStatus === 'pending' ? '#ffc107'
-            : msg.coworkStatus === 'approved' ? '#4caf50'
-            : msg.coworkStatus === 'rejected' ? '#f44336'
-            : msg.coworkStatus === 'forwarded' ? '#9c27b0'
-            : '#666';
-          
-          const statusIcon = msg.coworkStatus === 'pending' ? '⏳'
-            : msg.coworkStatus === 'approved' ? '✅'
-            : msg.coworkStatus === 'rejected' ? '❌'
-            : msg.coworkStatus === 'forwarded' ? '➡️'
-            : '❓';
-          
-          const isPending = msg.coworkStatus === 'pending';
-          const timeAgo = formatTimeAgo(new Date(msg.timestamp));
-          
-          let statusText = '';
-          if (msg.coworkStatus === 'approved') {
-            statusText = `✓ Routed to ${msg.destination}`;
-          } else if (msg.coworkStatus === 'rejected') {
-            statusText = '✗ Message rejected';
-          } else if (msg.coworkStatus === 'forwarded') {
-            statusText = '➡️ Message forwarded';
-          }
-          
-          return `
-            <div class="inbox-card" style="border-left: 4px solid ${statusColor};">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                <div>
-                  <div style="font-weight: 600; color: #fff; margin-bottom: 0.25rem;">
-                    ${msg.from} → ${msg.destination}
-                  </div>
-                  <div style="color: #888; font-size: 0.8rem;">${timeAgo}</div>
-                </div>
-                <span class="status-badge" style="background: ${statusColor}; color: ${msg.coworkStatus === 'pending' ? '#1a1a2e' : '#fff'};">
-                  ${statusIcon} ${msg.coworkStatus}
-                </span>
-              </div>
-              <div style="color: #ccc; font-size: 0.9rem; margin-bottom: 1rem; max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
-                ${escapeHtml(msg.task.substring(0, 150))}${msg.task.length > 150 ? '...' : ''}
-              </div>
-              ${isPending ? `
-                <div style="display: flex; gap: 0.5rem;">
-                  <button class="btn btn-primary" onclick="approveCoWorkMessage('${msg.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #4caf50;">
-                    ✓ Approve
-                  </button>
-                  <button class="btn btn-secondary" onclick="rejectCoWorkMessage('${msg.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; background: #f44336;">
-                    ✗ Reject
-                  </button>
-                  <button class="btn btn-secondary" onclick="forwardCoWorkMessage('${msg.id}')" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
-                    → Forward
-                  </button>
-                </div>
-              ` : `
-                <div style="color: #666; font-size: 0.8rem;">
-                  ${statusText}
-                </div>
-              `}
-            </div>
-          `;
-        }).join('');
-      } catch (e) {
-        console.error('Failed to load routing messages:', e);
-      }
-    }
-
-    async function approveCoWorkMessage(messageId) {
-      try {
-        await fetch(`${API_BASE}/api/cowork/route`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messageId, action: 'approve' })
-        });
-        loadRoutingMessages();
-        showToast('Message approved and routed!', 'success');
-      } catch (e) {
-        console.error('Failed to approve message:', e);
-        showToast('Failed to approve message', 'error');
-      }
-    }
-
-    async function rejectCoWorkMessage(messageId) {
-      if (!confirm('Are you sure you want to reject this message?')) return;
-      try {
-        await fetch(`${API_BASE}/api/cowork/route`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messageId, action: 'reject' })
-        });
-        loadRoutingMessages();
-        showToast('Message rejected', 'info');
-      } catch (e) {
-        console.error('Failed to reject message:', e);
-        showToast('Failed to reject message', 'error');
-      }
-    }
-
-    async function forwardCoWorkMessage(messageId) {
-      const forwardTo = prompt('Enter destination inbox (e.g., replit/project):');
-      if (!forwardTo) return;
-      try {
-        await fetch(`${API_BASE}/api/cowork/route`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messageId, action: 'forward', forwardTo })
-        });
-        loadRoutingMessages();
-        showToast(`Message forwarded to ${forwardTo}`, 'success');
-      } catch (e) {
-        console.error('Failed to forward message:', e);
-        showToast('Failed to forward message', 'error');
-      }
     }
 
     // ============== Sessions View ==============
@@ -2088,7 +1867,7 @@
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
       document.getElementById('sessions').style.display = 'block';
@@ -2222,7 +2001,7 @@
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('control-room').style.display = 'none';
       document.getElementById('audit').style.display = 'block';
@@ -2344,7 +2123,7 @@
       document.getElementById('inboxes').style.display = 'none';
       document.getElementById('threads').style.display = 'none';
       document.getElementById('cowork').style.display = 'none';
-      document.getElementById('routing').style.display = 'none';
+      
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
       document.getElementById('control-room').style.display = 'block';
@@ -3160,112 +2939,6 @@
     document.getElementById('cr-clear-btn')?.addEventListener('click', clearCrAgents);
 
     // ===== END CONTROL ROOM =====
-
-    let coworkAgentsCache = [];
-    
-    async function openCoWorkModal() {
-      const modal = document.getElementById('cowork-modal');
-      modal.classList.add('active');
-      
-      // Populate agent dropdown
-      try {
-        const res = await fetch(`${API_BASE}/api/cowork/agents`);
-        const { agents } = await res.json();
-        coworkAgentsCache = agents;
-        const select = document.getElementById('cowork-destination');
-        select.innerHTML = '<option value="">Select agent...</option>' + 
-          agents.map(a => `<option value="${a.name}">${a.name} (${a.category})</option>`).join('');
-        
-        // Update approval toggle when destination or from changes
-        select.addEventListener('change', updateApprovalToggle);
-        document.getElementById('cowork-from').addEventListener('input', updateApprovalToggle);
-      } catch (e) {
-        console.error('Failed to load agents:', e);
-      }
-    }
-    
-    function updateApprovalToggle() {
-      const destination = document.getElementById('cowork-destination').value;
-      const from = document.getElementById('cowork-from').value;
-      const toggle = document.getElementById('cowork-require-approval');
-      const hint = document.getElementById('approval-hint');
-      
-      const fromPlatform = from.replace(/^\/+/, '').split('/')[0].toLowerCase();
-      const destPlatform = destination.split('/')[0].toLowerCase();
-      
-      const fromAgent = coworkAgentsCache.find(a => a.name === fromPlatform);
-      const destAgent = coworkAgentsCache.find(a => a.name === destPlatform);
-      
-      // Determine if this would auto-approve
-      const toConversational = destAgent?.category === 'conversational';
-      const fromConversational = fromAgent?.category === 'conversational';
-      const bothAutonomous = !fromConversational && !toConversational;
-      
-      if (toConversational) {
-        toggle.checked = false;
-        hint.textContent = 'Auto-approved (conversational agent)';
-      } else if (bothAutonomous) {
-        toggle.checked = false;
-        hint.textContent = 'Auto-approved (autonomous → autonomous)';
-      } else if (fromConversational) {
-        toggle.checked = true;
-        hint.textContent = 'Requires approval (needs automation trigger)';
-      } else {
-        toggle.checked = false;
-        hint.textContent = '';
-      }
-    }
-
-    function closeCoWorkModal() {
-      document.getElementById('cowork-modal').classList.remove('active');
-      document.getElementById('cowork-destination').value = '';
-      document.getElementById('cowork-from').value = '';
-      document.getElementById('cowork-task').value = '';
-      document.getElementById('cowork-require-approval').checked = false;
-      document.getElementById('approval-hint').textContent = '';
-    }
-
-    async function sendViaCoWork() {
-      const destination = document.getElementById('cowork-destination').value;
-      const from = document.getElementById('cowork-from').value;
-      const task = document.getElementById('cowork-task').value;
-      const requireApproval = document.getElementById('cowork-require-approval').checked;
-      
-      if (!destination || !from || !task) {
-        showToast('Please fill in all fields', 'error');
-        return;
-      }
-      
-      try {
-        const res = await fetch(`${API_BASE}/api/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: 'cowork',
-            destination,
-            from,
-            task,
-            requireApproval
-          })
-        });
-        const data = await res.json();
-        
-        if (data.success) {
-          closeCoWorkModal();
-          if (data.autoApproved) {
-            showToast(`Message auto-routed to ${destination}!`, 'success');
-          } else {
-            showToast('Message queued for approval', 'info');
-          }
-          loadRoutingMessages();
-        } else {
-          showToast(data.error || 'Failed to send', 'error');
-        }
-      } catch (e) {
-        console.error('Failed to send via CoWork:', e);
-        showToast('Failed to send message', 'error');
-      }
-    }
 
     function escapeHtml(text) {
       const div = document.createElement('div');
@@ -4282,10 +3955,6 @@ pollQuackInbox();`;
     // Close settings modal on overlay click
     document.getElementById('settings-modal')?.addEventListener('click', (e) => {
       if (e.target.id === 'settings-modal') closeSettings();
-    });
-
-    document.getElementById('cowork-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'cowork-modal') closeCoWorkModal();
     });
 
     // Close Control Room modals on overlay click
