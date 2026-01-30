@@ -1,19 +1,6 @@
 {
   "claude/web": [
     {
-      "id": "ddd0cdf8-3ac9-4dc9-8e34-ac20c6d9b190",
-      "to": "claude/web",
-      "from": "test/agent",
-      "timestamp": "2026-01-28T04:43:59.340Z",
-      "expiresAt": "2026-01-30T04:43:59.340Z",
-      "status": "approved",
-      "task": "Test Auto-Wake webhook notification",
-      "files": [],
-      "threadId": "ddd0cdf8-3ac9-4dc9-8e34-ac20c6d9b190",
-      "project": "web",
-      "routing": "direct"
-    },
-    {
       "id": "84ed0a1e-c801-4c61-9fbb-9aa2be4192da",
       "to": "/claude/web",
       "from": "test/agent",

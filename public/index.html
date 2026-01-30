@@ -877,6 +877,106 @@
       font-weight: bold;
       margin-left: 0.5rem;
     }
+
+    /* Control Room Styles */
+    .cr-layout-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #888;
+    }
+    .cr-layout-btn:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .cr-layout-btn.active {
+      background: rgba(156, 39, 176, 0.2);
+      border-color: #9c27b0;
+      color: #e0e0e0;
+    }
+    .cr-agent-entry {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    .cr-agent-entry:hover {
+      border-color: rgba(255,255,255,0.2);
+    }
+    .cr-agent-entry.needs-wake {
+      border-color: #ffc107;
+      box-shadow: 0 0 10px rgba(255,193,7,0.2);
+    }
+    .cr-agent-entry.needs-wake::before {
+      content: '⚡';
+      font-size: 1.2rem;
+    }
+    .cr-agent-checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: #9c27b0;
+    }
+    .cr-agent-info {
+      flex: 1;
+    }
+    .cr-agent-name {
+      font-weight: 600;
+      color: #e0e0e0;
+      margin-bottom: 0.25rem;
+    }
+    .cr-agent-url {
+      font-size: 0.85rem;
+      color: #888;
+      word-break: break-all;
+    }
+    .cr-agent-inbox {
+      font-size: 0.8rem;
+      color: #00d9ff;
+      margin-top: 0.25rem;
+    }
+    .cr-agent-pending {
+      background: #ffc107;
+      color: #1a1a2e;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .cr-agent-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .cr-launch-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(156, 39, 176, 0.3);
+    }
+    .cr-launch-item .position-info {
+      flex: 1;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    .cr-launch-item .agent-name {
+      font-weight: 600;
+      color: #e0e0e0;
+      min-width: 150px;
+    }
   </style>
   <script src="/voyai-client.js"></script>
 </head>
@@ -940,6 +1040,7 @@
       <button class="btn btn-secondary" id="routing-view-btn" onclick="showRoutingView()">🔀 CoWork</button>
       <button class="btn btn-secondary" id="sessions-view-btn" onclick="showSessionsView()">🧠 Sessions</button>
       <button class="btn btn-secondary" id="audit-view-btn" onclick="showAuditView()">📋 Audit</button>
+      <button class="btn btn-secondary" id="control-room-view-btn" onclick="showControlRoomView()" style="background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(103, 58, 183, 0.3));">🎛️ Control Room</button>
     </div>
 
     <div class="inboxes" id="inboxes">
@@ -1073,6 +1174,115 @@
       </div>
       
       <div id="audit-pagination" style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;"></div>
+    </div>
+
+    <!-- Control Room View -->
+    <div class="control-room-view" id="control-room" style="display: none;">
+      <div class="cowork-stats" style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <div class="stat" style="background: rgba(156, 39, 176, 0.1); border-color: rgba(156, 39, 176, 0.3);">
+          <div class="stat-value" id="cr-agents-count">0</div>
+          <div class="stat-label">Registered Agents</div>
+        </div>
+        <div class="stat" style="background: rgba(255, 193, 7, 0.1); border-color: rgba(255, 193, 7, 0.3);">
+          <div class="stat-value" id="cr-wake-count">0</div>
+          <div class="stat-label">Need Wake</div>
+        </div>
+        <div class="stat" style="background: rgba(76, 175, 80, 0.1); border-color: rgba(76, 175, 80, 0.3);">
+          <div class="stat-value" id="cr-selected-count">0</div>
+          <div class="stat-label">Selected</div>
+        </div>
+      </div>
+
+      <h3 style="color: #9c27b0; margin-bottom: 1rem;">🎛️ Agent Control Room</h3>
+      <p style="color: #888; margin-bottom: 1.5rem; text-align: center;">Manage and launch multiple Replit agent windows in tiled layouts for efficient workflow management.</p>
+
+      <!-- Add Agent Form -->
+      <div class="cr-add-agent" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="color: #ffc107; margin-bottom: 1rem;">➕ Add Agent to Registry</h4>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+          <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; color: #888; font-size: 0.85rem; margin-bottom: 0.25rem;">Agent Name</label>
+            <input type="text" id="cr-agent-name" placeholder="e.g., Orchestrate" style="width: 100%; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
+          </div>
+          <div style="flex: 2; min-width: 250px;">
+            <label style="display: block; color: #888; font-size: 0.85rem; margin-bottom: 0.25rem;">Replit URL</label>
+            <input type="text" id="cr-agent-url" placeholder="e.g., https://replit.com/@user/project" style="width: 100%; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
+          </div>
+          <div style="flex: 1; min-width: 150px;">
+            <label style="display: block; color: #888; font-size: 0.85rem; margin-bottom: 0.25rem;">Inbox ID (optional)</label>
+            <input type="text" id="cr-agent-inbox" placeholder="e.g., replit/orchestrate" style="width: 100%; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #e0e0e0;">
+          </div>
+          <button class="btn btn-primary" onclick="crAddAgent()" style="background: linear-gradient(135deg, #9c27b0, #673ab7);">Add Agent</button>
+        </div>
+      </div>
+
+      <!-- Layout Selector -->
+      <div class="cr-layout-section" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="color: #00d9ff; margin-bottom: 1rem;">📐 Window Layout</h4>
+        <div class="cr-layouts" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+          <button class="cr-layout-btn active" data-layout="1x2" onclick="crSelectLayout('1x2')" title="2 columns">
+            <div class="cr-layout-preview" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 60px; height: 40px;">
+              <div style="background: #ffc107; border-radius: 2px;"></div>
+              <div style="background: #ffc107; border-radius: 2px;"></div>
+            </div>
+            <span>1+1</span>
+          </button>
+          <button class="cr-layout-btn" data-layout="1x3" onclick="crSelectLayout('1x3')" title="3 columns">
+            <div class="cr-layout-preview" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; width: 60px; height: 40px;">
+              <div style="background: #00d9ff; border-radius: 2px;"></div>
+              <div style="background: #00d9ff; border-radius: 2px;"></div>
+              <div style="background: #00d9ff; border-radius: 2px;"></div>
+            </div>
+            <span>1+2</span>
+          </button>
+          <button class="cr-layout-btn" data-layout="2x2" onclick="crSelectLayout('2x2')" title="2x2 grid">
+            <div class="cr-layout-preview" style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; width: 60px; height: 40px;">
+              <div style="background: #4caf50; border-radius: 2px;"></div>
+              <div style="background: #4caf50; border-radius: 2px;"></div>
+              <div style="background: #4caf50; border-radius: 2px;"></div>
+              <div style="background: #4caf50; border-radius: 2px;"></div>
+            </div>
+            <span>1+3</span>
+          </button>
+          <button class="cr-layout-btn" data-layout="3x2" onclick="crSelectLayout('3x2')" title="3x2 grid">
+            <div class="cr-layout-preview" style="display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; width: 60px; height: 40px;">
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+              <div style="background: #ff9800; border-radius: 2px;"></div>
+            </div>
+            <span>1+5</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Agent Registry List -->
+      <div class="cr-agents-section" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h4 style="color: #4caf50; margin: 0;">📋 Agent Registry</h4>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="crCheckWakeStatus()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">🔄 Refresh Wake</button>
+            <button class="btn btn-secondary" onclick="crSelectAll()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Select All</button>
+            <button class="btn btn-secondary" onclick="crDeselectAll()" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Clear</button>
+          </div>
+        </div>
+        <div id="cr-agents-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Agent entries will be rendered here -->
+        </div>
+      </div>
+
+      <!-- Launch Queue -->
+      <div class="cr-launch-section" style="background: rgba(156, 39, 176, 0.1); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(156, 39, 176, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h4 style="color: #9c27b0; margin: 0;">🚀 Launch Queue</h4>
+          <button class="btn btn-primary" onclick="crPrepareLaunch()" style="background: linear-gradient(135deg, #9c27b0, #673ab7);">Prepare Launch</button>
+        </div>
+        <div id="cr-launch-queue" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <p style="color: #888; text-align: center; padding: 1rem;">Select agents and click "Prepare Launch" to generate window positions</p>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -1475,6 +1685,7 @@
       document.getElementById('routing').style.display = 'none';
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       setActiveTab('inbox-view-btn');
     }
 
@@ -1486,6 +1697,7 @@
       document.getElementById('routing').style.display = 'none';
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       setActiveTab('thread-view-btn');
       loadThreads();
     }
@@ -1498,6 +1710,7 @@
       document.getElementById('routing').style.display = 'none';
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       setActiveTab('cowork-view-btn');
       loadAgents();
     }
@@ -1510,6 +1723,7 @@
       document.getElementById('routing').style.display = 'block';
       document.getElementById('sessions').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       setActiveTab('routing-view-btn');
       loadRoutingMessages();
     }
@@ -1663,6 +1877,7 @@
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'none';
       document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       document.getElementById('sessions').style.display = 'block';
       setActiveTab('sessions-view-btn');
       loadSessions();
@@ -1796,6 +2011,7 @@
       document.getElementById('cowork').style.display = 'none';
       document.getElementById('routing').style.display = 'none';
       document.getElementById('sessions').style.display = 'none';
+      document.getElementById('control-room').style.display = 'none';
       document.getElementById('audit').style.display = 'block';
       setActiveTab('audit-view-btn');
       loadAuditStats();
@@ -1903,6 +2119,274 @@
       auditOffset += auditLimit;
       loadAuditLogs();
     }
+
+    // ===== CONTROL ROOM =====
+    let crAgents = JSON.parse(localStorage.getItem('quack-control-room-agents') || '[]');
+    let crSelectedLayout = '1x2';
+    let crLaunchQueue = [];
+    let crPendingByInbox = {};
+
+    function showControlRoomView() {
+      currentView = 'control-room';
+      document.getElementById('inboxes').style.display = 'none';
+      document.getElementById('threads').style.display = 'none';
+      document.getElementById('cowork').style.display = 'none';
+      document.getElementById('routing').style.display = 'none';
+      document.getElementById('sessions').style.display = 'none';
+      document.getElementById('audit').style.display = 'none';
+      document.getElementById('control-room').style.display = 'block';
+      setActiveTab('control-room-view-btn');
+      crLoadAgents();
+      crCheckWakeStatus();
+    }
+
+    function crSaveAgents() {
+      localStorage.setItem('quack-control-room-agents', JSON.stringify(crAgents));
+    }
+
+    function crAddAgent() {
+      const name = document.getElementById('cr-agent-name').value.trim();
+      const url = document.getElementById('cr-agent-url').value.trim();
+      const inbox = document.getElementById('cr-agent-inbox').value.trim();
+
+      if (!name || !url) {
+        alert('Please enter agent name and URL');
+        return;
+      }
+
+      const id = Date.now().toString();
+      crAgents.push({ id, name, url, inbox, selected: false });
+      crSaveAgents();
+      crLoadAgents();
+
+      // Clear inputs
+      document.getElementById('cr-agent-name').value = '';
+      document.getElementById('cr-agent-url').value = '';
+      document.getElementById('cr-agent-inbox').value = '';
+    }
+
+    function crRemoveAgent(id) {
+      crAgents = crAgents.filter(a => a.id !== id);
+      crSaveAgents();
+      crLoadAgents();
+    }
+
+    function crToggleAgent(id) {
+      const agent = crAgents.find(a => a.id === id);
+      if (agent) {
+        agent.selected = !agent.selected;
+        crSaveAgents();
+        crUpdateStats();
+      }
+    }
+
+    function crSelectAll() {
+      crAgents.forEach(a => a.selected = true);
+      crSaveAgents();
+      crLoadAgents();
+    }
+
+    function crDeselectAll() {
+      crAgents.forEach(a => a.selected = false);
+      crSaveAgents();
+      crLoadAgents();
+    }
+
+    async function crCheckWakeStatus() {
+      crPendingByInbox = {};
+      let wakeCount = 0;
+
+      for (const agent of crAgents) {
+        if (agent.inbox) {
+          try {
+            const res = await fetch(`${API_BASE}/api/inbox/${agent.inbox}`);
+            const data = await res.json();
+            const pending = data.messages?.filter(m => m.status === 'pending' || m.status === 'approved').length || 0;
+            crPendingByInbox[agent.inbox] = pending;
+            if (pending > 0) wakeCount++;
+          } catch (e) {
+            crPendingByInbox[agent.inbox] = 0;
+          }
+        }
+      }
+
+      document.getElementById('cr-wake-count').textContent = wakeCount;
+      crRenderAgentsList();
+    }
+
+    function crLoadAgents() {
+      crRenderAgentsList();
+      crUpdateStats();
+    }
+
+    function crRenderAgentsList() {
+      const container = document.getElementById('cr-agents-list');
+      
+      if (crAgents.length === 0) {
+        container.innerHTML = `<p style="color: #888; text-align: center; padding: 2rem;">No agents registered. Add agents above to get started.</p>`;
+        return;
+      }
+
+      container.innerHTML = crAgents.map(agent => {
+        const pending = agent.inbox ? (crPendingByInbox[agent.inbox] || 0) : 0;
+        const needsWake = pending > 0;
+        
+        return `
+          <div class="cr-agent-entry ${needsWake ? 'needs-wake' : ''}" data-agent-id="${escapeHtml(agent.id)}">
+            <input type="checkbox" class="cr-agent-checkbox" ${agent.selected ? 'checked' : ''} data-action="toggle" data-id="${escapeHtml(agent.id)}">
+            <div class="cr-agent-info">
+              <div class="cr-agent-name">${escapeHtml(agent.name)}</div>
+              <div class="cr-agent-url">${escapeHtml(agent.url)}</div>
+              ${agent.inbox ? `<div class="cr-agent-inbox">📥 ${escapeHtml(agent.inbox)}</div>` : ''}
+            </div>
+            ${pending > 0 ? `<span class="cr-agent-pending">${pending} pending</span>` : ''}
+            <div class="cr-agent-actions">
+              <button class="btn btn-secondary cr-open-btn" data-action="open" data-id="${escapeHtml(agent.id)}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Open</button>
+              <button class="btn btn-danger cr-remove-btn" data-action="remove" data-id="${escapeHtml(agent.id)}" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Attach event listeners using event delegation
+      container.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', crHandleAction);
+        el.addEventListener('change', crHandleAction);
+      });
+    }
+
+    function crHandleAction(e) {
+      const action = e.target.dataset.action;
+      const id = e.target.dataset.id;
+      
+      if (action === 'toggle') {
+        crToggleAgent(id);
+      } else if (action === 'open') {
+        crOpenAgent(id);
+      } else if (action === 'remove') {
+        crRemoveAgent(id);
+      }
+    }
+
+    function crOpenAgent(id) {
+      const agent = crAgents.find(a => a.id === id);
+      if (agent && agent.url) {
+        // Validate URL before opening
+        try {
+          const url = new URL(agent.url);
+          if (url.protocol === 'http:' || url.protocol === 'https:') {
+            window.open(agent.url, '_blank');
+          }
+        } catch (e) {
+          console.error('Invalid URL:', agent.url);
+        }
+      }
+    }
+
+    function crUpdateStats() {
+      document.getElementById('cr-agents-count').textContent = crAgents.length;
+      document.getElementById('cr-selected-count').textContent = crAgents.filter(a => a.selected).length;
+    }
+
+    function crSelectLayout(layout) {
+      crSelectedLayout = layout;
+      document.querySelectorAll('.cr-layout-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.layout === layout);
+      });
+    }
+
+    function crGetLayoutConfig(layout) {
+      const configs = {
+        '1x2': { cols: 2, rows: 1, slots: 2 },
+        '1x3': { cols: 3, rows: 1, slots: 3 },
+        '2x2': { cols: 2, rows: 2, slots: 4 },
+        '3x2': { cols: 3, rows: 2, slots: 6 }
+      };
+      return configs[layout] || configs['1x2'];
+    }
+
+    function crPrepareLaunch() {
+      const selected = crAgents.filter(a => a.selected);
+      
+      if (selected.length === 0) {
+        alert('Please select at least one agent to launch');
+        return;
+      }
+
+      const config = crGetLayoutConfig(crSelectedLayout);
+      const screenW = screen.availWidth;
+      const screenH = screen.availHeight;
+      const screenX = screen.availLeft || 0;
+      const screenY = screen.availTop || 0;
+
+      const windowW = Math.floor(screenW / config.cols);
+      const windowH = Math.floor(screenH / config.rows);
+
+      crLaunchQueue = [];
+
+      selected.slice(0, config.slots).forEach((agent, index) => {
+        const col = index % config.cols;
+        const row = Math.floor(index / config.cols);
+        
+        const left = screenX + (col * windowW);
+        const top = screenY + (row * windowH);
+
+        crLaunchQueue.push({
+          agent,
+          left,
+          top,
+          width: windowW,
+          height: windowH,
+          launched: false
+        });
+      });
+
+      crRenderLaunchQueue();
+    }
+
+    function crRenderLaunchQueue() {
+      const container = document.getElementById('cr-launch-queue');
+
+      if (crLaunchQueue.length === 0) {
+        container.innerHTML = `<p style="color: #888; text-align: center; padding: 1rem;">Select agents and click "Prepare Launch" to generate window positions</p>`;
+        return;
+      }
+
+      container.innerHTML = crLaunchQueue.map((item, index) => `
+        <div class="cr-launch-item">
+          <span class="agent-name">${index + 1}. ${escapeHtml(item.agent.name)}</span>
+          <span class="position-info">left: ${item.left}, top: ${item.top}, ${item.width}×${item.height}</span>
+          <button class="btn ${item.launched ? 'btn-secondary' : 'btn-primary'}" onclick="crLaunchWindow(${index})" style="padding: 0.4rem 0.8rem;" ${item.launched ? 'disabled' : ''}>
+            ${item.launched ? '✓ Opened' : '🚀 Open'}
+          </button>
+        </div>
+      `).join('') + `
+        <div style="margin-top: 1rem; text-align: center;">
+          <button class="btn btn-primary" onclick="crLaunchAll()" style="background: linear-gradient(135deg, #4caf50, #8bc34a);">🚀 Launch All</button>
+        </div>
+      `;
+    }
+
+    function crLaunchWindow(index) {
+      const item = crLaunchQueue[index];
+      if (!item || item.launched) return;
+
+      const features = `left=${item.left},top=${item.top},width=${item.width},height=${item.height},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`;
+      window.open(item.agent.url, `quack-agent-${item.agent.id}`, features);
+      
+      item.launched = true;
+      crRenderLaunchQueue();
+    }
+
+    function crLaunchAll() {
+      crLaunchQueue.forEach((item, index) => {
+        if (!item.launched) {
+          setTimeout(() => crLaunchWindow(index), index * 500);
+        }
+      });
+    }
+
+    // ===== END CONTROL ROOM =====
 
     let coworkAgentsCache = [];
     
