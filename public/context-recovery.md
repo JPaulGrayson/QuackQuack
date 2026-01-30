@@ -388,7 +388,6 @@ console.log('Recovered context:', injection_prompt);
 
 - [Quack API Reference](/) — Full messaging API
 - [Bridge Authentication](bridge-auth.md) — WebSocket auth
-- [Grok Integration](grok-integration.md) — GET-only agent support
 
 ---
 

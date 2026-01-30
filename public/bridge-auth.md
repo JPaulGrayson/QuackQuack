@@ -226,7 +226,6 @@ When dev bypass is enabled:
 ## 🔗 Related Documentation
 
 - [Quack API Reference](/)
-- [Grok Integration Guide](grok-integration.md) — GET-only agent support
 - [Bridge WebSocket Protocol](/) — Full message protocol specification
 
 ---

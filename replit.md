@@ -61,10 +61,9 @@ The system uses **Express.js** with TypeScript (Node.js) and `tsx` for execution
     - Payload: `{ event, inbox, from, messageId, task, timestamp }`
     - Security: `X-Quack-Signature` header with HMAC-SHA256 if `webhookSecret` is set
     - Enables agents to wake up when they receive messages without polling
--   **GET Relay Endpoint**: `GET /bridge/relay` provides message sending for GET-only agents (like Grok):
+-   **GET Relay Endpoint**: `GET /bridge/relay` provides message sending for GET-only agents:
     - Query params: `from`, `to`, `task`, `context`, `auto_approve`
     - Supports `auto_approve=true` for seamless autonomous operation
-    - Documentation at `/grok-integration.md`
 
 ### Frontend
 A static HTML/CSS/JS dashboard in `public/` provides a real-time inbox monitoring interface. Features include:
