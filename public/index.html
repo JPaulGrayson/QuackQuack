@@ -2574,6 +2574,16 @@ When Replit is working on a task:
 - Don't forget to Republish AND click "Approve and publish"
 - Don't passively wait (active monitoring loop)
 
+### Tab Discipline (CRITICAL)
+
+**BEFORE any browser action:**
+1. ALWAYS call \`tabs_context_mcp\` first to see what tabs exist
+2. NEVER open a new tab if the target URL is already open - switch to the existing tab instead
+3. NEVER have more than one tab per unique URL
+4. Close tabs you're done with immediately
+
+**Why:** Opening excess tabs correlates with context loss and reset loops. Minimal tabs = maintained focus.
+
 ---
 
 ## 6. SESSION START CHECKLIST
