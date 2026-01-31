@@ -3065,21 +3065,23 @@ Ready for instructions. What would you like to work on?"`;
       }
     }
 
-    // Event delegation for Control Room action buttons
-    document.getElementById('cr-action-buttons')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-cr-action]');
-      if (!btn) return;
-      
-      const action = btn.dataset.crAction;
-      switch (action) {
-        case 'launch-session': crLaunchSession(); break;
-        case 'send-quack': crOpenSendQuack(); break;
-        case 'new-workflow': crNewWorkflow(); break;
-        case 'analyze-code': crAnalyzeCode(); break;
-        case 'run-template': crRunTemplate(); break;
-        case 'refresh-all': crRefreshAll(); break;
-        case 'test-agent': crTestAgent(); break;
-      }
+    // Event delegation for Control Room action buttons (wait for DOM)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('cr-action-buttons')?.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-cr-action]');
+        if (!btn) return;
+        
+        const action = btn.dataset.crAction;
+        switch (action) {
+          case 'launch-session': crLaunchSession(); break;
+          case 'send-quack': crOpenSendQuack(); break;
+          case 'new-workflow': crNewWorkflow(); break;
+          case 'analyze-code': crAnalyzeCode(); break;
+          case 'run-template': crRunTemplate(); break;
+          case 'refresh-all': crRefreshAll(); break;
+          case 'test-agent': crTestAgent(); break;
+        }
+      });
     });
 
     // Event delegation for modal close buttons
