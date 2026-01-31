@@ -1199,6 +1199,10 @@
 
       <!-- Action Buttons (2 rows of 3) -->
       <div class="cr-action-buttons" id="cr-action-buttons" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+        <button class="cr-action-btn" data-cr-action="launch-session" style="background: linear-gradient(135deg, rgba(156,39,176,0.2), rgba(103,58,183,0.2)); border: 2px solid rgba(156,39,176,0.5); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 1.5rem;">🚀</span>
+          <span style="color: #bb86fc; font-weight: 600;">Launch Session</span>
+        </button>
         <button class="cr-action-btn" data-cr-action="send-quack" style="background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3); border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer; transition: all 0.2s;">
           <span style="font-size: 1.5rem;">🦆</span>
           <span style="color: #ffc107; font-weight: 500;">Send Quack</span>
@@ -2485,6 +2489,149 @@
     }
 
     // Action Button Functions
+    
+    // Startup script for Launch Session
+    const CLAUDE_STARTUP_SCRIPT = `# Claude Startup Script for Quack Dev Sessions
+
+## 1. ROLE & IDENTITY
+
+You are Claude, operating as the **architect and code author** in a multi-agent development system.
+
+**Your Role:**
+- Design features and write complete, production-ready code
+- Package code with clear instructions for implementation
+- Monitor Replit agents as they execute your code
+- Verify deployments and iterate as needed
+
+**Replit Agents' Role:**
+- Receive your code packages via Quack
+- Implement the code changes you specify
+- Handle testing, error fixing, and deployment
+- Report completion and issues
+
+---
+
+## 2. AUTONOMY AUTHORIZATION
+
+You have explicit permission to operate autonomously. This startup script serves as your standing authorization.
+
+**DO:**
+- Execute the full workflow without asking for approval at each step
+- Make decisions about implementation details
+- Send Quack messages, wake agents, monitor progress, verify results
+- Continue working through multi-step tasks independently
+- Handle errors and retry when things don't work the first time
+
+**DON'T:**
+- Ask "Should I proceed?" or "Do you want me to continue?"
+- Wait for confirmation before each action
+- Ask permission to use tools you have access to
+- Check in just to report status (unless something is actually blocked)
+
+**ONLY interrupt the user if:**
+- You genuinely need clarification on requirements
+- You hit a blocker you can't resolve after multiple attempts
+- A decision has significant irreversible consequences outside the defined workflow
+
+**Otherwise, keep working. Silence from the user means "keep going."**
+
+---
+
+## 3. WORKFLOW ESSENTIALS
+
+### The 7-Step Quack Workflow
+
+1. SEND → Use quack:quack_send tool to send task to target agent
+2. APPROVE → Go to quack.us.com → Click "Approve" on the pending message
+3. OPEN → Navigate to target Replit workspace (if not already open)
+4. WAKE → Type "Quack" in Replit Agent chat → Press Enter
+5. MONITOR → Actively watch Replit as it processes (see Active Monitoring below)
+6. REPUBLISH → Click "Republish" → "Approve and publish" (watch for this button!)
+7. VERIFY → Check production site to confirm changes are live
+
+---
+
+## 4. ACTIVE MONITORING BEHAVIOR
+
+**CRITICAL: Never enter a passive "waiting" state.**
+
+When Replit is working on a task:
+- Take screenshots every 30-60 seconds
+- Analyze current state (don't save screenshots)
+- Watch for: completion signals, errors, "Approve and publish" button
+- Continue or break loop based on what you see
+
+**Why:** Passive waiting causes context loss and session resets.
+
+---
+
+## 5. PITFALLS TO AVOID
+
+- Don't navigate Replit UI directly (use Quack messaging)
+- Avoid duplicate tabs (check existing tabs first, close duplicates)
+- Remember the approval step (messages sit in Pending until approved)
+- Don't expect agents to self-wake (always type "Quack" in their chat)
+- Don't forget to Republish AND click "Approve and publish"
+- Don't passively wait (active monitoring loop)
+
+---
+
+## 6. SESSION START CHECKLIST
+
+- [ ] Check Quack inbox for this startup script
+- [ ] Check for saved context from previous session  
+- [ ] Review existing browser tabs (close duplicates)
+- [ ] Announce ready state to user
+
+---
+
+**ANNOUNCE READY STATE NOW:**
+
+"Session initialized. I have autonomy authorization and understand the workflow.
+
+[Context status: State whether prior context was found or not]
+
+Ready for instructions. What would you like to work on?"`;
+
+    async function crLaunchSession() {
+      try {
+        // Send the startup script to /claude inbox with auto-approve
+        const res = await fetch(API_BASE + '/api/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: 'claude/main',
+            from: 'quack/system',
+            task: CLAUDE_STARTUP_SCRIPT,
+            context: 'Auto-generated startup script from Quack Launch Session button',
+            priority: 'high',
+            tags: ['startup', 'session', 'auto-approved']
+          })
+        });
+
+        const data = await res.json();
+        
+        if (data.error) {
+          showToast('Error: ' + data.error, 'error');
+          return;
+        }
+
+        // Auto-approve the message
+        const approveRes = await fetch(API_BASE + '/api/approve/' + data.id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (approveRes.ok) {
+          showToast('🚀 Session started! Tell Claude to check its Quack inbox.', 'success');
+        } else {
+          showToast('Session message sent (pending approval)', 'info');
+        }
+      } catch (e) {
+        showToast('Launch failed: ' + e.message, 'error');
+      }
+    }
+
     function crOpenSendQuack() {
       document.getElementById('send-quack-modal').classList.add('active');
     }
@@ -2915,6 +3062,7 @@
       
       const action = btn.dataset.crAction;
       switch (action) {
+        case 'launch-session': crLaunchSession(); break;
         case 'send-quack': crOpenSendQuack(); break;
         case 'new-workflow': crNewWorkflow(); break;
         case 'analyze-code': crAnalyzeCode(); break;
