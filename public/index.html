@@ -2622,7 +2622,7 @@ Ready for instructions. What would you like to work on?"`;
         const data = await res.json();
         
         if (data.error) {
-          showToast('Error: ' + data.error, 'error');
+          showSimpleToast('Error: ' + data.error, 'error');
           return;
         }
 
@@ -2633,12 +2633,12 @@ Ready for instructions. What would you like to work on?"`;
         });
 
         if (approveRes.ok) {
-          showToast('🚀 Session started! Tell Claude to check its Quack inbox.', 'success');
+          showSimpleToast('🚀 Session started! Tell Claude to check its Quack inbox.', 'success');
         } else {
-          showToast('Session message sent (pending approval)', 'info');
+          showSimpleToast('Session message sent (pending approval)', 'info');
         }
       } catch (e) {
-        showToast('Launch failed: ' + e.message, 'error');
+        showSimpleToast('Launch failed: ' + e.message, 'error');
       }
     }
 
@@ -4515,6 +4515,17 @@ pollQuackInbox();`;
       } catch (e) {
         console.error('Toast error:', e);
       }
+    }
+
+    // Simple text toast for notifications (success, error, info)
+    function showSimpleToast(text, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.style.cssText = 'background: ' + (type === 'success' ? '#1b5e20' : type === 'error' ? '#b71c1c' : '#1565c0') + '; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; animation: slideIn 0.3s ease;';
+      toast.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center;"><span>' + text + '</span><button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem;">&times;</button></div>';
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
     }
 
     function showToast(message) {
