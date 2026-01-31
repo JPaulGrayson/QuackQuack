@@ -574,6 +574,29 @@
       background: #c82333;
     }
 
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #888;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(103, 58, 183, 0.3));
+      color: #fff;
+      border-color: rgba(156, 39, 176, 0.5);
+    }
+
     .empty-state {
       text-align: center;
       padding: 3rem;
@@ -2800,7 +2823,7 @@
     async function crLoadAuditList() {
       const container = document.getElementById('cr-audit-list');
       try {
-        const res = await fetch(`${API_BASE}/api/audit?limit=20`);
+        const res = await fetch(`${API_BASE}/api/audit/logs?limit=20`);
         const data = await res.json();
         const logs = data.logs || [];
 
