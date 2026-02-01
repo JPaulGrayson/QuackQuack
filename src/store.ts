@@ -11,7 +11,8 @@ import {
   QuackMessage, 
   QuackFile, 
   SendMessageRequest, 
-  MessageStatus 
+  MessageStatus,
+  ControlMessageType
 } from './types.js';
 import { shouldAutoApprove as coworkShouldAutoApprove } from './cowork-store.js';
 import { logAudit, archiveThread } from './db.js';
@@ -188,6 +189,16 @@ export function validateInboxPath(to: string, hasProjectMetadata: boolean = fals
   return { valid: true };
 }
 
+// Detect control messages (OpenClaw-inspired)
+// These special messages signal conversation state changes
+export function detectControlMessage(task: string): { isControl: boolean; type?: ControlMessageType } {
+  const trimmed = task.trim().toUpperCase();
+  if (trimmed === 'REPLY_SKIP') return { isControl: true, type: 'REPLY_SKIP' };
+  if (trimmed === 'ANNOUNCE_SKIP') return { isControl: true, type: 'ANNOUNCE_SKIP' };
+  if (trimmed === 'CONVERSATION_END') return { isControl: true, type: 'CONVERSATION_END' };
+  return { isControl: false };
+}
+
 // Send a message
 export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMessage {
   const now = new Date();
@@ -223,6 +234,9 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
   
   const messageId = uuid();
   
+  // Check for control messages
+  const controlInfo = detectControlMessage(req.task);
+  
   // Determine if this is agent-to-agent (autonomous) or needs human approval
   // Uses CoWork agent registry for dynamic configuration
   // Can be overridden with requireApproval flag
@@ -252,6 +266,10 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
     // CoWork routing
     routing: req.routing || 'direct',
     routedAt: req.routing === 'cowork' ? now.toISOString() : undefined,
+    // Control flow
+    isControlMessage: controlInfo.isControl,
+    controlType: controlInfo.type,
+    threadStatus: controlInfo.type === 'CONVERSATION_END' ? 'completed' : undefined,
   };
   
   // Add file sizes if not present
@@ -269,14 +287,16 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
   inboxes.get(inbox)!.push(message);
   persistStore();
   
-  console.log(`📨 Message ${message.id} sent to /${inbox}${shouldApprove ? ' (auto-approved)' : ''}${threadId ? ` (thread: ${threadId.substring(0, 8)}...)` : ''}`);
+  console.log(`📨 Message ${message.id} sent to /${inbox}${shouldApprove ? ' (auto-approved)' : ''}${threadId ? ` (thread: ${threadId.substring(0, 8)}...)` : ''}${controlInfo.isControl ? ` [CONTROL: ${controlInfo.type}]` : ''}`);
   
   // Audit log
   logAudit('message.send', message.from, 'message', message.id, {
     to: message.to,
     status: message.status,
     threadId: message.threadId,
-    priority: message.priority
+    priority: message.priority,
+    isControlMessage: controlInfo.isControl,
+    controlType: controlInfo.type
   }).catch(e => console.error('Audit log failed:', e));
   
   return message;

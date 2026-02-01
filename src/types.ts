@@ -12,6 +12,18 @@ export type MessageStatus = 'pending' | 'approved' | 'in_progress' | 'read' | 'c
 // Valid statuses for API updates
 export const VALID_STATUSES: MessageStatus[] = ['pending', 'approved', 'in_progress', 'read', 'completed', 'failed'];
 
+// ============== Control Messages (OpenClaw-inspired) ==============
+// Control messages allow agents to signal conversation state changes
+
+export type ControlMessageType = 
+  | 'REPLY_SKIP'        // Agent signals: "I'm done, don't expect a reply"
+  | 'ANNOUNCE_SKIP'     // Agent signals: "Don't announce this to channel"
+  | 'CONVERSATION_END'; // Agent signals: "This conversation is complete"
+
+export type ThreadStatus = 'active' | 'completed' | 'abandoned';
+
+// ============== End Control Messages ==============
+
 // File attachment
 export interface QuackFile {
   name: string;
@@ -78,6 +90,11 @@ export interface QuackMessage {
   replyTo?: string;             // message ID this is replying to
   threadId?: string;            // thread ID linking conversation
   replyCount?: number;          // number of replies to this message
+
+  // Control flow (OpenClaw-inspired)
+  isControlMessage?: boolean;
+  controlType?: ControlMessageType;
+  threadStatus?: ThreadStatus;
 }
 
 // CoWork routing action
