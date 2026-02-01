@@ -1,9 +1,9 @@
 run = "npm run dev"
 entrypoint = "src/server.ts"
-modules = ["nodejs-20", "postgresql-16"]
+modules = ["nodejs-20", "web"]
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
 
 [deployment]
 run = ["npx", "tsx", "src/server.ts"]
