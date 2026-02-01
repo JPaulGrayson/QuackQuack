@@ -305,7 +305,7 @@ export function sendMessage(req: SendMessageRequest, fromAgent: string): QuackMe
   
   // Create or update session for this conversation
   try {
-    const session = createSession(message.from, message.to, message.threadId!, {
+    const session = createSession(message.from, message.to, message.threadId, {
       tags: message.tags,
     });
     
